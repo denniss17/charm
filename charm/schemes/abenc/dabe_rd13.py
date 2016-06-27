@@ -18,28 +18,52 @@ from charm.toolbox.ABEncMultiAuth import ABEncMultiAuth
 
 debug = False
 
+def merge_dicts(*dict_args):
+    """
+    Given any number of dicts, shallow copy and merge into a new dict,
+    precedence goes to key value pairs in latter dicts.
+    """
+    result = {}
+    for dictionary in dict_args:
+        result.update(dictionary)
+    return result
 
 class DabeRD13(ABEncMultiAuth):
     """
-    Decentralized Ciphertext-Policy Attribute-Based Encryption Scheme with Fast Decryption.
+    Encryption scheme based on
+    "Decentralized Ciphertext-Policy Attribute-Based Encryption Scheme with Fast Decryption."
+    by Rao and Dutta, http://dx.doi.org/10.1007/978-3-642-40779-6_5.
 
     >>> group = PairingGroup('SS512')
     >>> dabe = DabeRD13(group)
     >>> public_parameters = dabe.setup()
-    >>> attributes = ['ONE', 'TWO', 'THREE', 'FOUR']
-    >>> (public_key, master_key) = dabe.authsetup(public_parameters, attributes)
+
+        Setup the attribute authorities
+    >>> attributes1 = ['ONE', 'TWO']
+    >>> attributes2 = ['THREE', 'FOUR']
+    >>> (public_key1, master_key1) = dabe.authsetup(public_parameters, attributes1)
+    >>> (public_key2, master_key2) = dabe.authsetup(public_parameters, attributes2)
 
         Setup a user and give him some keys
     >>> gid = "bob"
-    >>> user_attributes = ['THREE', 'ONE', 'TWO']
-    >>> secret_keys = dabe.keygen(public_parameters, master_key, gid, user_attributes)
+    >>> user_attributes1 = ['ONE', 'TWO']
+    >>> user_attributes2 = ['THREE']
+    >>> secret_keys1 = dabe.keygen(public_parameters, master_key1, gid, user_attributes1)
+    >>> secret_keys2 = dabe.keygen(public_parameters, master_key2, gid, user_attributes2)
+    >>> secret_keys = merge_dicts(secret_keys1, secret_keys2)
+
+        Create a random message
     >>> message = group.random(GT)
 
+        Encrypt the message using
         (ONE AND THREE) OR (TWO AND FOUR)
     >>> access_structure = [['ONE', 'THREE'], ['TWO', 'FOUR']]
-    >>> cipher_text = dabe.encrypt(public_key, public_parameters, message, access_structure)
-    >>> decrypted_msg = dabe.decrypt(public_parameters, secret_keys, cipher_text, gid)
-    >>> decrypted_msg == message
+    >>> public_keys = merge_dicts(public_key1, public_key2)
+    >>> cipher_text = dabe.encrypt(public_keys, public_parameters, message, access_structure)
+
+        Decrypt the message
+    >>> decrypted_message = dabe.decrypt(public_parameters, secret_keys, cipher_text, gid)
+    >>> decrypted_message == message
     True
     """
 
@@ -161,15 +185,21 @@ if __name__ == '__main__':
     group = PairingGroup('SS512')
     dabe = DabeRD13(group)
     public_parameters = dabe.setup()
-    attributes = ['ONE', 'TWO', 'THREE', 'FOUR']
-    (public_key, master_key) = dabe.authsetup(public_parameters, attributes)
+    attributes1 = ['ONE', 'TWO']
+    attributes2 = ['THREE', 'FOUR']
+    (public_key1, master_key1) = dabe.authsetup(public_parameters, attributes1)
+    (public_key2, master_key2) = dabe.authsetup(public_parameters, attributes2)
     gid = "bob"
-    user_attributes = ['THREE', 'ONE', 'TWO']
-    secret_keys = dabe.keygen(public_parameters, master_key, gid, user_attributes)
+    user_attributes1 = ['ONE', 'TWO']
+    user_attributes2 = ['THREE']
+    secret_keys1 = dabe.keygen(public_parameters, master_key1, gid, user_attributes1)
+    secret_keys2 = dabe.keygen(public_parameters, master_key2, gid, user_attributes2)
+    secret_keys = merge_dicts(secret_keys1, secret_keys2)
     message = group.random(GT)
     access_structure = [['ONE', 'THREE'], ['TWO', 'FOUR']]
-    ciphertext = dabe.encrypt(public_key, public_parameters, message, access_structure)
-    decrypted_message = dabe.decrypt(public_parameters, secret_keys, ciphertext, gid)
+    public_keys = merge_dicts(public_key1, public_key2)
+    cipher_text = dabe.encrypt(public_keys, public_parameters, message, access_structure)
+    decrypted_message = dabe.decrypt(public_parameters, secret_keys, cipher_text, gid)
     print("Decrypted message")
     print(decrypted_message)
     print(decrypted_message == message)
