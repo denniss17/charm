@@ -65,6 +65,14 @@ class DabeRD13(ABEncMultiAuth):
     >>> decrypted_message = dabe.decrypt(public_parameters, secret_keys, cipher_text, gid)
     >>> decrypted_message == message
     True
+
+        Attempt to decrypt an unaccessible message
+    >>> access_structure = [['TWO', 'FOUR']]
+    >>> cipher_text = dabe.encrypt(public_keys, public_parameters, message, access_structure)
+    >>> decrypted_message = dabe.decrypt(public_parameters, secret_keys, cipher_text, gid)
+    Traceback (most recent call last):
+     ...
+    Exception: You don't have the required attributes for decryption!
     """
 
     def __init__(self, group):
@@ -91,7 +99,11 @@ class DabeRD13(ABEncMultiAuth):
         return gp
 
     def authsetup(self, gp, attributes):
-        """Authority Setup for a given set of attributes"""
+        """
+        Authority Setup for a given set of attributes.
+        :param gp: The global parameters.
+        :param attributes: The attributes of the authority.
+        """
         pk = {}
         mk = {}
         for attribute in attributes:
@@ -106,6 +118,15 @@ class DabeRD13(ABEncMultiAuth):
         return pk, mk
 
     def keygen(self, gp, mk, gid, attributes):
+        """
+        Generate secret keys for the user with the given global identifier for the attributes.
+        :param gp: The global parameters.
+        :param mk: The master keys of the attribute authority.
+        :param gid: The global identifier of the user.
+        :param attributes: The attributes of this attribute authority to generate the secret keys for.
+        :raise AssertionError: Raised when one of the attributes is not managed by the authority.
+        :return: The secret keys for the attributes for the user.
+        """
         sk = {}
         for attribute in attributes:
             assert attribute in mk
@@ -124,6 +145,8 @@ class DabeRD13(ABEncMultiAuth):
         :param gp: The global parameters.
         :param message: The message to encrypt.
         :param access_structure: The basis monotone access structure to encrypt the message with.
+        :raise AssertionError: Raised when one of the attributes is not in the public keys.
+        :return: The ciphertext encrypted with the access structure.
         """
         ct = {'A': access_structure}
         for i in range(0, len(access_structure)):
@@ -155,7 +178,8 @@ class DabeRD13(ABEncMultiAuth):
         :param sk: The secret key of the user.
         :param ct: The ciphertext to decrypt.
         :param gid: The identifier of the user.
-        :return:
+        :raise Exception: Raised when the secret keys of the user do not satisfy the access structure.
+        :return: The decrypted message.
         """
         # Get the smallest authorized set which can be satisfied with the secret keys
         access_structure = ct['A']
@@ -203,3 +227,8 @@ if __name__ == '__main__':
     print("Decrypted message")
     print(decrypted_message)
     print(decrypted_message == message)
+
+    debug = False
+
+    import doctest
+    doctest.testmod()
