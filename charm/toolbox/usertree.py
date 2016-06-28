@@ -1,9 +1,15 @@
 from charm.toolbox.node import BinaryNode
 
-
 class BinaryUserTreeNode(BinaryNode):
-    def __init__(self, value, left=None, right=None):
+    def __init__(self, index, value, left=None, right=None):
         super(BinaryUserTreeNode, self).__init__(value, left, right)
+        self.index = index
+
+    def __str__(self):
+        if self.left is None or self.right is None:
+            return "%d:%s" % (self.index, str(self.value))
+        else:
+            return "%d:%s (%s, %s)" % (self.index, str(self.value), str(self.left), str(self.right))
 
 
 class BinaryUserTree:
@@ -20,14 +26,15 @@ class BinaryUserTree:
         self.height = height
         self.root = self.populate_tree(generator, height)
 
-    def populate_tree(self, generator, height):
+    def populate_tree(self, generator, height, index=1):
         """
         Create a tree of given height and populate the nodes
         and leaves with values returned by the generator function.
         """
-        node = BinaryUserTreeNode(generator())
+        node = BinaryUserTreeNode(index, generator())
         if height > 1:
-            node.addSubNode(self.populate_tree(generator, height - 1), self.populate_tree(generator, height - 1))
+            node.addSubNode(self.populate_tree(generator, height - 1, index * 2),
+                            self.populate_tree(generator, height - 1, index * 2 + 1))
         return node
 
     def get_leaf(self, index):

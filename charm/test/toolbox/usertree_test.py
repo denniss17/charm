@@ -12,7 +12,7 @@ class UserTreeTest(unittest.TestCase):
 
     def test_get_path(self):
         tree = BinaryUserTree(4, lambda: self.generator())
-        # This creates the following tree:
+        # This creates the following tree with as values:
         #           1
         #        /     \
         #     2            9
