@@ -12,18 +12,18 @@ class UserTreeTest(unittest.TestCase):
 
     def test_get_path(self):
         tree = BinaryUserTree(4, lambda: self.generator())
-        # This creates the following tree with as values:
+        # This creates the following tree with as indices:
         #           1
         #        /     \
-        #     2            9
+        #     2            3
         #    / \          / \
-        #  3     6     10    13
+        #  4     5     6     7
         #  /\    /\    /\    /\
-        # 4  5  7  8  11 12 14 15
-        self.assertEqual(list(map(lambda x: x.value, tree.get_path(0))), [1, 2, 3, 4])
-        self.assertEqual(list(map(lambda x: x.value, tree.get_path(2))), [1, 2, 6, 7])
-        self.assertEqual(list(map(lambda x: x.value, tree.get_path(5))), [1, 9, 10, 12])
-        self.assertEqual(list(map(lambda x: x.value, tree.get_path(7))), [1, 9, 13, 15])
+        # 8  9  10 11 12 13 14 15
+        self.assertEqual(list(map(lambda x: x.index, tree.get_path(0))), [1, 2, 4, 8])
+        self.assertEqual(list(map(lambda x: x.index, tree.get_path(2))), [1, 2, 8, 10])
+        self.assertEqual(list(map(lambda x: x.index, tree.get_path(5))), [1, 3, 6, 13])
+        self.assertEqual(list(map(lambda x: x.index, tree.get_path(7))), [1, 3, 7, 15])
 
 
 if __name__ == "__main__":
