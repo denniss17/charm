@@ -21,7 +21,7 @@ class UserTreeTest(unittest.TestCase):
         #  /\    /\    /\    /\
         # 8  9  10 11 12 13 14 15
         self.assertEqual(list(map(lambda x: x.index, tree.get_path(0))), [1, 2, 4, 8])
-        self.assertEqual(list(map(lambda x: x.index, tree.get_path(2))), [1, 2, 8, 10])
+        self.assertEqual(list(map(lambda x: x.index, tree.get_path(2))), [1, 2, 5, 10])
         self.assertEqual(list(map(lambda x: x.index, tree.get_path(5))), [1, 3, 6, 13])
         self.assertEqual(list(map(lambda x: x.index, tree.get_path(7))), [1, 3, 7, 15])
 
