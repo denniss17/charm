@@ -20,6 +20,12 @@ class BinaryNode:
         self.left = left if left is not None else None
         self.right = right if left is not None else None
 
+    def __str__(self):
+        if self.left is None or self.right is None:
+            return "%s" % str(self.value)
+        else:
+            return "%s (%s, %s)" % (str(self.value), str(self.left), str(self.right))
+
 
 class BinNode(BinaryNode):
     def __init__(self, value, left=None, right=None):

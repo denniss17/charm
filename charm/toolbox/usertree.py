@@ -40,12 +40,15 @@ class BinaryUserTree:
         """
         return self._get_path(index, self.root, self.height)
 
+    def __str__(self):
+        return "BinaryUserTree %s" % str(self.root)
+
     def _get_path(self, index, node, height):
         if height == 1:
             return [node]
         else:
             # The number of leaves, for height 4 this is 8 (2^3)
-            size = 2 ^ (height - 1)
+            size = 2 ** (height - 1)
             if index < size / 2:
                 # Leaf is in the left side of the tree
                 return [node] + self._get_path(index, node.left, height - 1)
