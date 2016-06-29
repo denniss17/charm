@@ -130,40 +130,40 @@ class Taac(ABEncMultiAuth):
             print(states)
         return pk, mk, states
 
-    def keygen(self, gp, mk, states, gid, attributes):
+    def keygen(self, gp, mk, state, gid, attribute):
         """
-        Generate secret keys for the user with the given global identifier for the attributes.
+        Generate secret keys for the user with the given global identifier for the attribute.
         :param gp: The global parameters.
         :param mk: The master keys of the attribute authority.
-        :param states: The states of the attributes
+        :param state: The state of the attribute
         :param gid: The global identifier of the user.
-        :param attributes: The attributes of this attribute authority to generate the secret keys for.
+        :param attribute: The attribute of this attribute authority to generate the secret keys for.
         :raise AssertionError: Raised when one of the attributes is not managed by the authority.
         :return: The secret keys for the attributes for the user.
         """
         sk = {}
-        for attribute in attributes:
-            if gid in states[attribute]['list']:
-                # Use the existing leaf
-                leaf_index = states[attribute]['list'][gid]
-            else:
-                # Update attribute state, assigning the leftmost empty leaf to the user
-                assert states[attribute]['ctr'] < 2 ** (states[attribute]['h'] - 1)
-                leaf_index = states[attribute]['ctr']
-                states[attribute]['list'][gid] = leaf_index
-                states[attribute]['ctr'] += 1
-            # Get the path to the leaf
-            path = mk[attribute]['tree'].get_path(leaf_index)
-            sk[attribute] = {}
-            for v in path:
-                sk[attribute][v.index] = (gp['g'] ** mk[attribute]['a']) * (
-                gp['H'](gid) ** mk[attribute]['b']) * v.value
+        if gid in state['list']:
+            # Use the existing leaf
+            leaf_index = state['list'][gid]
+        else:
+            # Update attribute state, assigning the leftmost empty leaf to the user
+            assert state['ctr'] < 2 ** (state['h'] - 1)
+            leaf_index = state['ctr']
+            state['list'][gid] = leaf_index
+            state['ctr'] += 1
+        # Get the path to the leaf
+        path = mk[attribute]['tree'].get_path(leaf_index)
+        sk[attribute] = {}
+        for v in path:
+            k_xv = (gp['g'] ** mk[attribute]['a']) * (gp['H'](gid) ** mk[attribute]['b']) * v.value
+            sk[v.index] = k_xv
         if debug:
-            print("User secret keys")
+            print("User secret key")
+            print(attribute)
             print(sk)
         return sk
 
-    def updatekeygen(self, gp, pk, mk, rl, t, attributes):
+    def updatekeygen(self, gp, pk, mk, rl, t, attribute):
         """
         Generate update keys for timeslot t, where keys are only updated for users not in the revocation list rl.
         :param gp: The global parameters.
@@ -171,18 +171,16 @@ class Taac(ABEncMultiAuth):
         :param mk: The master key of the authority.
         :param rl: The revocation list for the attributes containing user ids of revoked users.
         :param t: The timeslot.
-        :param attributes: The attributes to generate update keys for.
+        :param attribute: The attribute to generate update keys for.
         :return: A set of update keys for the attributes.
         """
         uk = {}
-        for attribute in attributes:
-            nodes = self.updatekeynodes(attribute, mk, rl)
-            uk[attribute] = {}
-            for v in nodes:
-                exponent = self.group.random(ZR)
-                e_v = v.value * (pk['H'](attribute, t) ** exponent)
-                e_v2 = gp['g'] ** exponent
-                uk[attribute][v.index] = (e_v, e_v2)
+        nodes = self.updatekeynodes(attribute, mk, rl)
+        for v in nodes:
+            exponent = self.group.random(ZR)
+            e_v = v.value * (pk['H'](attribute, t) ** exponent)
+            e_v2 = gp['g'] ** exponent
+            uk[v.index] = (e_v, e_v2)
         return uk
 
     def updatekeynodes(self, attribute, mk, rl):
@@ -238,6 +236,37 @@ class Taac(ABEncMultiAuth):
         pass
 
     def decryption_key_computation(self, sk, uk):
+        """
+        Calculate the decryption key for a single attribute.
+        :param sk: The user's secret key part for the attribute.
+        :param uk: The update key part for the attribute.
+        :return: The decryption key if the user possesses the attribute at the time, None otherwise.
+        """
+        # Secret keys
+        # for v in path:
+        #    k_xv = (gp['g'] ** mk[attribute]['a']) * (gp['H'](gid) ** mk[attribute]['b']) * v.value
+        #    sk[v.index] = k_xv
+        # Update keys
+        # for v in nodes:
+        #    exponent = self.group.random(ZR)
+        #    e_v = v.value * (pk['H'](attribute, t) ** exponent)
+        #    e_v2 = gp['g'] ** exponent
+        #    uk[v.index] = (e_v, e_v2)
+        # If the user possesses the attribute at t, there exists a unique v_x such that v_x in path(u) and in N_x
+        # (the set of updated nodes in the update key)
+        # We try to find this node
+        intersection = set(sk.keys()) & set(uk.keys())
+        if len(intersection) > 0:
+            # Node is found
+            v_x = intersection.pop()
+            # Extract keys
+            k_x = sk[v_x]
+            (e_v, e_v2) = uk[v_x]
+            # Calculate update key
+            return k_x / e_v, e_v2
+        else:
+            # Node is not found, so the user does not possess this attribute at time t
+            return None
 
 
 
