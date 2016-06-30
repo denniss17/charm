@@ -39,45 +39,59 @@ class Taac(ABEncMultiAuth):
     by Yang, Kan and Liu, Zhen and Cao, Zhenfu and Jia, Xiaohua and Wong, Duncan S and Ren, Kui,
     http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.257.8838&rep=rep1&type=pdf.
 
+        Setup
     >>> group = PairingGroup('SS512')
-    >>> taac = DabeRD13(group)
-    >>> public_parameters = dabe.setup()
+    >>> taac = Taac(group)
+    >>> public_parameters = taac.setup()
 
-        Setup the attribute authorities
+        Authority setup
     >>> attributes1 = ['ONE', 'TWO']
     >>> attributes2 = ['THREE', 'FOUR']
-    >>> (public_key1, master_key1) = taac.authsetup(public_parameters, attributes1)
-    >>> (public_key2, master_key2) = taac.authsetup(public_parameters, attributes2)
+    >>> (public_key1, master_key1, states1) = taac.authsetup(public_parameters, attributes1, 4)
+    >>> (public_key2, master_key2, states2) = taac.authsetup(public_parameters, attributes2, 4)
 
-        Setup a user and give him some keys
+        User secret keys
     >>> gid = "bob"
     >>> user_attributes1 = ['ONE', 'TWO']
     >>> user_attributes2 = ['THREE']
-    >>> secret_keys1 = taac.keygen(public_parameters, master_key1, gid, user_attributes1)
-    >>> secret_keys2 = taac.keygen(public_parameters, master_key2, gid, user_attributes2)
-    >>> secret_keys = merge_dicts(secret_keys1, secret_keys2)
+    >>> secret_keys1 = taac.keygen(public_parameters, master_key1, states1, gid, user_attributes1)
+    >>> secret_keys2 = taac.keygen(public_parameters, master_key2, states2, gid, user_attributes2)
 
-        Create a random message
+        Encrypt for time period 1
     >>> message = group.random(GT)
-
-        Encrypt the message using
-        (ONE AND THREE) OR (TWO AND FOUR)
-    >>> access_structure = [['ONE', 'THREE'], ['TWO', 'FOUR']]
+    >>> access_policy = '(ONE or THREE) and (TWO or FOUR)'
     >>> public_keys = merge_dicts(public_key1, public_key2)
-    >>> cipher_text = taac.encrypt(public_keys, public_parameters, message, access_structure)
+    >>> cipher_text = taac.encrypt(public_keys, public_parameters, message, access_policy, 1)
+
+        Generate update keys for time period 1
+    >>> update_keys1 = taac.generate_update_keys(public_parameters, public_key1, master_key1, {}, 1, attributes1)
+    >>> update_keys2 = taac.generate_update_keys(public_parameters, public_key2, master_key2, {}, 1, attributes2)
+
+        Calculate decryption keys
+    >>> decryption_keys1 = taac.decryption_keys_computation(secret_keys1, update_keys1)
+    >>> decryption_keys2 = taac.decryption_keys_computation(secret_keys2, update_keys2)
+    >>> decryption_keys = Taac.merge_timed_keys(decryption_keys1, decryption_keys2)
 
         Decrypt the message
-    >>> decrypted_message = taac.decrypt(public_parameters, secret_keys, cipher_text, gid)
+    >>> decrypted_message = taac.decrypt(public_parameters, decryption_keys, cipher_text, gid)
     >>> decrypted_message == message
     True
 
         Attempt to decrypt an unaccessible message
-    >>> access_structure = [['TWO', 'FOUR']]
-    >>> cipher_text = dabe.encrypt(public_keys, public_parameters, message, access_structure)
-    >>> decrypted_message = dabe.decrypt(public_parameters, secret_keys, cipher_text, gid)
+    >>> access_policy = 'FOUR and TWO'
+    >>> cipher_text = taac.encrypt(public_keys, public_parameters, message, access_policy, 1)
+    >>> decrypted_message = taac.decrypt(public_parameters, decryption_keys, cipher_text, gid)
     Traceback (most recent call last):
      ...
     Exception: You don't have the required attributes for decryption!
+
+        Attempt to decrypt a message of another time period
+    >>> access_policy = '(ONE or THREE) and (TWO or FOUR)'
+    >>> cipher_text = taac.encrypt(public_keys, public_parameters, message, access_policy, 2)
+    >>> decrypted_message = taac.decrypt(public_parameters, decryption_keys, cipher_text, gid)
+    Traceback (most recent call last):
+     ...
+    Exception: This ciphertext was encrypted for another time period!
     """
 
     def __init__(self, group):
@@ -210,14 +224,35 @@ class Taac(ABEncMultiAuth):
         return uks
 
     def updatekeynodes(self, attribute, mk, rl):
+        """
+        Determine the minimum set of nodes to update covering all non-revoked uses.
+        :param attribute: The attribute to determine the set of nodes for.
+        :param mk: The master key of the attribute authority.
+        :param rl: The revocation list.
+        :return: The minimum set of nodes to update.
+        """
         # For now simply return the root
         return [mk[attribute]['tree'].root]
 
     @staticmethod
     def merge_timed_keys(*timed_keys):
+        """
+        Merge timed keys, like the update keys or the decryption keys.
+        :param timed_keys: A list of timed keys to merge.
+        :return: The merged keys.
+
+        >>> Taac.merge_timed_keys({'t': 1, {'keys': {'a': 'A'}}, {'t': 1, {'keys': {'b': 'B'}})
+        {'t': 1, {'keys': {'a': 'A', 'b': 'B'}}
+
+        >>> Taac.merge_timed_keys({'t': 1, {'keys': {'a': 'A'}}, {'t': 2, {'keys': {'b': 'B'}})
+        Traceback (most recent call last):
+        ...
+        AssertError: Keys can not be merged as the time period differs.
+        """
         result = {'keys': {}}
         for authority_timed_keys in timed_keys:
-            assert 't' not in result or result['t'] == authority_timed_keys['t']
+            assert 't' not in result or result['t'] == authority_timed_keys['t'], \
+                "Keys can not be merged as the time period differs."
             result['t'] = authority_timed_keys['t']
             result['keys'].update(authority_timed_keys['keys'])
         if debug:
