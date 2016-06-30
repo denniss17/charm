@@ -97,7 +97,7 @@ class Taac(ABEncMultiAuth):
         g = self.group.random(G1)
         # H is an hash function which maps strings to group elements
         h = lambda x: self.group.hash(x, G1)
-        gp = {'g': g, 'h': h}
+        gp = {'g': g, 'H': h}
         if debug:
             print("Global parameters")
             print(gp)
@@ -130,49 +130,53 @@ class Taac(ABEncMultiAuth):
             print(states)
         return pk, mk, states
 
-    def keygen(self, gp, mk, state, gid, attribute):
+    def keygen(self, gp, mk, states, gid, attributes):
         """
-        Generate secret keys for the user with the given global identifier for the attribute.
+        Generate secret keys for the user with the given global identifier for the attributes.
         :param gp: The global parameters.
         :param mk: The master keys of the attribute authority.
-        :param state: The state of the attribute
+        :param states: The states of the attribute
         :param gid: The global identifier of the user.
-        :param attribute: The attribute of this attribute authority to generate the secret keys for.
+        :param attributes: The attributes of this attribute authority to generate the secret keys for.
         :raise AssertionError: Raised when one of the attributes is not managed by the authority.
         :return: The secret keys for the attributes for the user.
         """
         sk = {}
-        if gid in state['list']:
-            # Use the existing leaf
-            leaf_index = state['list'][gid]
-        else:
-            # Update attribute state, assigning the leftmost empty leaf to the user
-            assert state['ctr'] < 2 ** (state['h'] - 1)
-            leaf_index = state['ctr']
-            state['list'][gid] = leaf_index
-            state['ctr'] += 1
-        # Get the path to the leaf
-        path = mk[attribute]['tree'].get_path(leaf_index)
-        sk[attribute] = {}
-        for v in path:
-            k_xv = (gp['g'] ** mk[attribute]['a']) * (gp['H'](gid) ** mk[attribute]['b']) * v.value
-            sk[v.index] = k_xv
+        for attribute in attributes:
+            if gid in states[attribute]['list']:
+                # Use the existing leaf
+                leaf_index = states[attribute]['list'][gid]
+            else:
+                # Update attribute state, assigning the leftmost empty leaf to the user
+                if states[attribute]['ctr'] >= 2 ** (states[attribute]['h'] - 1):
+                    raise Exception("The binary user tree of %s is full (height=%d, max=%d)!" %
+                                    (attribute, states[attribute]['h'], 2 ** (states[attribute]['h'] - 1)))
+                leaf_index = states[attribute]['ctr']
+                states[attribute]['list'][gid] = leaf_index
+                states[attribute]['ctr'] += 1
+            # Get the path to the leaf
+            path = mk[attribute]['tree'].get_path(leaf_index)
+            sk[attribute] = {}
+            for v in path:
+                k_xv = (gp['g'] ** mk[attribute]['a']) * (gp['H'](gid) ** mk[attribute]['b']) * v.value
+                sk[attribute][v.index] = k_xv
         if debug:
             print("User secret key")
-            print(attribute)
+            print(attributes)
             print(sk)
         return sk
 
-    def updatekeygen(self, gp, pk, mk, rl, t, attribute):
+    def generate_update_key(self, gp, pk, mk, rl, t, attribute):
         """
-        Generate update keys for timeslot t, where keys are only updated for users not in the revocation list rl.
+        Generate update keys for timeslot t for a single attribute,
+        where keys are only updated for users not in the revocation list rl.
         :param gp: The global parameters.
         :param pk: The public key of the authority.
         :param mk: The master key of the authority.
         :param rl: The revocation list for the attributes containing user ids of revoked users.
         :param t: The timeslot.
         :param attribute: The attribute to generate update keys for.
-        :return: A set of update keys for the attributes.
+        :return: A set of update keys for the attribute.
         """
         uk = {}
         nodes = self.updatekeynodes(attribute, mk, rl)
@@ -183,9 +187,43 @@ class Taac(ABEncMultiAuth):
             uk[v.index] = (e_v, e_v2)
         return uk
 
+    def generate_update_keys(self, gp, pk, mk, rls, t, attributes):
+        """
+        Generate update keys for timeslot t for a list of attributes,
+        where keys are only updated for users not in the revocation list rls[attribute].
+        :param gp: The global parameters.
+        :param pk: The public key of the authority.
+        :param mk: The master key of the authority.
+        :param rls: The revocation lists for the attributes containing user ids of revoked users.
+        If a revocation list is not present for an attribute, it is assumed to be empty.
+        :param t: The timeslot.
+        :param attributes: The list of attributes to generate update keys for.
+        :return: A set of update keys for the attributes.
+        """
+        uks = {'t': t, 'keys': {}}
+        for attribute in attributes:
+            rl = rls[attribute] if attribute in rls else []
+            uks['keys'][attribute] = self.generate_update_key(gp, pk, mk, rl, t, attribute)
+        if debug:
+            print("Update keys")
+            print(uks)
+        return uks
+
     def updatekeynodes(self, attribute, mk, rl):
         # For now simply return the root
         return [mk[attribute]['tree'].root]
+
+    @staticmethod
+    def merge_timed_keys(*timed_keys):
+        result = {'keys': {}}
+        for authority_timed_keys in timed_keys:
+            assert 't' not in result or result['t'] == authority_timed_keys['t']
+            result['t'] = authority_timed_keys['t']
+            result['keys'].update(authority_timed_keys['keys'])
+        if debug:
+            print("Merged keys")
+            print(result)
+        return result
 
     def encrypt(self, pk, gp, message, access_policy, t):
         """
@@ -206,7 +244,7 @@ class Taac(ABEncMultiAuth):
         ushares = self.util.calculateSharesDict(group.init(ZR, 0), policy)
         # Encrypt the message
         c = message * pair(gp['g'], gp['g']) ** s
-        ct = {'A': access_policy, 'C': c}
+        ct = {'A': access_policy, 't': t, 'c': c}
         for attribute in vshares.keys():
             r = self.group.random(ZR)
             c_1 = (pair(gp['g'], gp['g']) ** vshares[attribute]) * (pk[attribute]['e(g,g)^a'] ** r)
@@ -220,20 +258,6 @@ class Taac(ABEncMultiAuth):
             print("Ciphertext")
             print(ct)
         return ct
-
-    def decrypt(self, gp, sk, ct, gid):
-        """
-        Decrypt the ciphertext using the user's secret keys.
-
-        :param gp: The global parameters.
-        :param sk: The secret key of the user.
-        :param ct: The ciphertext to decrypt.
-        :param gid: The identifier of the user.
-        :raise Exception: Raised when the secret keys of the user do not satisfy the access structure.
-        :return: The decrypted message.
-        """
-        # Get the smallest authorized set which can be satisfied with the secret keys
-        pass
 
     def decryption_key_computation(self, sk, uk):
         """
@@ -268,35 +292,87 @@ class Taac(ABEncMultiAuth):
             # Node is not found, so the user does not possess this attribute at time t
             return None
 
+    def decryption_keys_computation(self, sks, uks):
+        dks = {'t': uks['t'], 'keys': {}}
+        for attribute in sks:
+            dk = self.decryption_key_computation(sks[attribute], uks['keys'][attribute])
+            if dk is not None:
+                dks['keys'][attribute] = dk
+        if debug:
+            print("Decryption keys")
+            print(dks)
+        return dks
+
+    def decrypt(self, gp, dk, ct, gid):
+        """
+        Decrypt the ciphertext using the user's secret keys.
+
+        :param gp: The global parameters.
+        :param dk: The decryption keys of the user as dict from attribute to key.
+        :param ct: The ciphertext to decrypt.
+        :param gid: The identifier of the user.
+        :raise Exception: Raised when the secret keys of the user do not satisfy the access structure.
+        :return: The decrypted message.
+        """
+        if ct['t'] != dk['t']:
+            raise Exception("This ciphertext was encrypted for another time period!")
+
+        # Get the smallest authorized set which can be satisfied with the secret keys
+        policy = self.util.createPolicy(ct['A'])
+        coefficients = self.util.getCoefficients(policy)
+        pruned_list = self.util.prune(policy, dk['keys'].keys())
+
+        if not pruned_list:
+            raise Exception("You don't have the required attributes for decryption!")
+
+        product = self.group.init(GT, 1)
+        for i in range(len(pruned_list)):
+            x = pruned_list[i].getAttribute()  # without the underscore
+            y = pruned_list[i].getAttributeAndIndex()  # with the underscore
+            c_i = (ct[y]['c_1'] * pair(gp['H'](gid), ct[y]['c_2'])) / \
+                  (pair(dk['keys'][x][0], ct[y]['c_3']) * pair(dk['keys'][x][1], ct[y]['c_4']))
+            product *= c_i ** coefficients[y]
+        return ct['c'] / product
 
 
 if __name__ == '__main__':
     debug = True
 
+    # Setup
     group = PairingGroup('SS512')
     taac = Taac(group)
     public_parameters = taac.setup()
+
+    # Authority setup
     attributes1 = ['ONE', 'TWO']
     attributes2 = ['THREE', 'FOUR']
-    (public_key1, master_key1) = taac.authsetup(public_parameters, attributes1)
-    (public_key2, master_key2) = taac.authsetup(public_parameters, attributes2)
+    (public_key1, master_key1, states1) = taac.authsetup(public_parameters, attributes1, 4)
+    (public_key2, master_key2, states2) = taac.authsetup(public_parameters, attributes2, 4)
+
+    # User secret keys
     gid = "bob"
     user_attributes1 = ['ONE', 'TWO']
     user_attributes2 = ['THREE']
-    secret_keys1 = taac.keygen(public_parameters, master_key1, gid, user_attributes1)
-    secret_keys2 = taac.keygen(public_parameters, master_key2, gid, user_attributes2)
-    secret_keys = merge_dicts(secret_keys1, secret_keys2)
+    secret_keys1 = taac.keygen(public_parameters, master_key1, states1, gid, user_attributes1)
+    secret_keys2 = taac.keygen(public_parameters, master_key2, states2, gid, user_attributes2)
+
+    # Encrypt for time period 1
     message = group.random(GT)
-    access_structure = [['ONE', 'THREE'], ['TWO', 'FOUR']]
+    access_policy = '(ONE or THREE) and (TWO or FOUR)'
     public_keys = merge_dicts(public_key1, public_key2)
-    cipher_text = taac.encrypt(public_keys, public_parameters, message, access_structure)
-    decrypted_message = taac.decrypt(public_parameters, secret_keys, cipher_text, gid)
+    cipher_text = taac.encrypt(public_keys, public_parameters, message, access_policy, 1)
+
+    # Generate update keys for time period 1
+    update_keys1 = taac.generate_update_keys(public_parameters, public_key1, master_key1, [], 1, attributes1)
+    update_keys2 = taac.generate_update_keys(public_parameters, public_key2, master_key2, [], 1, attributes2)
+
+    # Calculate decryption keys
+    decryption_keys1 = taac.decryption_keys_computation(secret_keys1, update_keys1)
+    decryption_keys2 = taac.decryption_keys_computation(secret_keys2, update_keys2)
+    decryption_keys = Taac.merge_timed_keys(decryption_keys1, decryption_keys2)
+
+    # Decrypt the message
+    decrypted_message = taac.decrypt(public_parameters, decryption_keys, cipher_text, gid)
     print("Decrypted message")
     print(decrypted_message)
     print(decrypted_message == message)
-
-    debug = False
-
-    import doctest
-
-    doctest.testmod()
