@@ -241,13 +241,13 @@ class Taac(ABEncMultiAuth):
         :param timed_keys: A list of timed keys to merge.
         :return: The merged keys.
 
-        >>> Taac.merge_timed_keys({'t': 1, 'keys': {'a': 'A'}}, {'t': 1, 'keys': {'b': 'B'}})
-        {'t': 1, 'keys': {'a': 'A', 'b': 'B'}}
-
+        >>> merged = Taac.merge_timed_keys({'t': 1, 'keys': {'a': 'A'}}, {'t': 1, 'keys': {'b': 'B'}})
+        >>> merged == {'t': 1, 'keys': {'a': 'A', 'b': 'B'}}
+        True
         >>> Taac.merge_timed_keys({'t': 1, 'keys': {'a': 'A'}}, {'t': 2, 'keys': {'b': 'B'}})
         Traceback (most recent call last):
         ...
-        AssertError: Keys can not be merged as the time period differs.
+        AssertionError: Keys can not be merged as the time period differs.
         """
         result = {'keys': {}}
         for authority_timed_keys in timed_keys:
