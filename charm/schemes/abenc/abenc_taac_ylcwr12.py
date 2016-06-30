@@ -241,10 +241,10 @@ class Taac(ABEncMultiAuth):
         :param timed_keys: A list of timed keys to merge.
         :return: The merged keys.
 
-        >>> Taac.merge_timed_keys({'t': 1, {'keys': {'a': 'A'}}, {'t': 1, {'keys': {'b': 'B'}})
-        {'t': 1, {'keys': {'a': 'A', 'b': 'B'}}
+        >>> Taac.merge_timed_keys({'t': 1, 'keys': {'a': 'A'}}, {'t': 1, 'keys': {'b': 'B'}})
+        {'t': 1, 'keys': {'a': 'A', 'b': 'B'}}
 
-        >>> Taac.merge_timed_keys({'t': 1, {'keys': {'a': 'A'}}, {'t': 2, {'keys': {'b': 'B'}})
+        >>> Taac.merge_timed_keys({'t': 1, 'keys': {'a': 'A'}}, {'t': 2, 'keys': {'b': 'B'}})
         Traceback (most recent call last):
         ...
         AssertError: Keys can not be merged as the time period differs.
@@ -276,7 +276,7 @@ class Taac(ABEncMultiAuth):
         policy = self.util.createPolicy(access_policy)
         # Calculate shares of the secret as dict from attribute to share
         vshares = self.util.calculateSharesDict(s, policy)
-        ushares = self.util.calculateSharesDict(group.init(ZR, 0), policy)
+        ushares = self.util.calculateSharesDict(self.group.init(ZR, 0), policy)
         # Encrypt the message
         c = message * pair(gp['g'], gp['g']) ** s
         ct = {'A': access_policy, 't': t, 'c': c}
