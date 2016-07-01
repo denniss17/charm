@@ -44,8 +44,6 @@ class MaabeRW15(ABEncMultiAuth):
     >>> public_parameters = maabe.setup()
 
         Setup the attribute authorities
-    >>> attributes1 = ['ONE', 'TWO']
-    >>> attributes2 = ['THREE', 'FOUR']
     >>> (public_key1, secret_key1) = maabe.authsetup(public_parameters, 'UT')
     >>> (public_key2, secret_key2) = maabe.authsetup(public_parameters, 'OU')
     >>> public_keys = {'UT': public_key1, 'OU': public_key2}
