@@ -28,6 +28,7 @@ def merge_dicts(*dict_args):
         result.update(dictionary)
     return result
 
+
 class DabeRD13(ABEncMultiAuth):
     """
     Encryption scheme based on
@@ -59,7 +60,7 @@ class DabeRD13(ABEncMultiAuth):
         (ONE AND THREE) OR (TWO AND FOUR)
     >>> access_structure = [['ONE', 'THREE'], ['TWO', 'FOUR']]
     >>> public_keys = merge_dicts(public_key1, public_key2)
-    >>> cipher_text = dabe.encrypt(public_keys, public_parameters, message, access_structure)
+    >>> cipher_text = dabe.encrypt(public_parameters, public_keys, message, access_structure)
 
         Decrypt the message
     >>> decrypted_message = dabe.decrypt(public_parameters, secret_keys, cipher_text, gid)
@@ -68,7 +69,7 @@ class DabeRD13(ABEncMultiAuth):
 
         Attempt to decrypt an unaccessible message
     >>> access_structure = [['TWO', 'FOUR']]
-    >>> cipher_text = dabe.encrypt(public_keys, public_parameters, message, access_structure)
+    >>> cipher_text = dabe.encrypt(public_parameters, public_keys, message, access_structure)
     >>> decrypted_message = dabe.decrypt(public_parameters, secret_keys, cipher_text, gid)
     Traceback (most recent call last):
      ...
@@ -137,7 +138,7 @@ class DabeRD13(ABEncMultiAuth):
             print(sk)
         return sk
 
-    def encrypt(self, pk, gp, message, access_structure):
+    def encrypt(self, gp, pk, message, access_structure):
         """
         Encrypt the given message m using the monotone access structure.
 
@@ -222,7 +223,7 @@ if __name__ == '__main__':
     message = group.random(GT)
     access_structure = [['ONE', 'THREE'], ['TWO', 'FOUR']]
     public_keys = merge_dicts(public_key1, public_key2)
-    cipher_text = dabe.encrypt(public_keys, public_parameters, message, access_structure)
+    cipher_text = dabe.encrypt(public_parameters, public_keys, message, access_structure)
     decrypted_message = dabe.decrypt(public_parameters, secret_keys, cipher_text, gid)
     print("Decrypted message")
     print(decrypted_message)

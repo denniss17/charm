@@ -31,7 +31,7 @@ class DabeTest(unittest.TestCase):
         m = groupObj.random(GT)
         policy = '((one or three) and (TWO or FOUR))'
         if debug: print('Acces Policy: %s' % policy)
-        CT = dabe.encrypt(PK, GP, m, policy)
+        CT = dabe.encrypt(GP, PK, m, policy)
         if debug: print("\nCiphertext...")
         if debug: groupObj.debug(CT)    
         
@@ -70,7 +70,7 @@ class HybridABEncMATest(unittest.TestCase):
         msg = b'Hello World, I am a sensitive record!'
         size = len(msg)
         policy_str = "(jhmi.doctor or (jhmi.researcher and jhu.professor))"
-        ct = hyb_abema.encrypt(allAuthPK, gp, msg, policy_str)    
+        ct = hyb_abema.encrypt(gp, allAuthPK, msg, policy_str)
 
         if debug:
             print("Ciphertext")

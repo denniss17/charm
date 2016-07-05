@@ -61,7 +61,7 @@ class Taac(ABEncMultiAuth):
     >>> message = group.random(GT)
     >>> access_policy = '(ONE or THREE) and (TWO or FOUR)'
     >>> public_keys = merge_dicts(public_key1, public_key2)
-    >>> cipher_text = taac.encrypt(public_keys, public_parameters, message, access_policy, 1)
+    >>> cipher_text = taac.encrypt(public_parameters, public_keys, message, access_policy, 1)
 
         Generate update keys for time period 1
     >>> update_keys1 = taac.generate_update_keys(public_parameters, public_key1, master_key1, {}, 1, attributes1)
@@ -79,7 +79,7 @@ class Taac(ABEncMultiAuth):
 
         Attempt to decrypt an unaccessible message
     >>> access_policy = 'FOUR and TWO'
-    >>> cipher_text = taac.encrypt(public_keys, public_parameters, message, access_policy, 1)
+    >>> cipher_text = taac.encrypt(public_parameters, public_keys, message, access_policy, 1)
     >>> decrypted_message = taac.decrypt(public_parameters, decryption_keys, cipher_text, gid)
     Traceback (most recent call last):
      ...
@@ -87,7 +87,7 @@ class Taac(ABEncMultiAuth):
 
         Attempt to decrypt a message of another time period
     >>> access_policy = '(ONE or THREE) and (TWO or FOUR)'
-    >>> cipher_text = taac.encrypt(public_keys, public_parameters, message, access_policy, 2)
+    >>> cipher_text = taac.encrypt(public_parameters, public_keys, message, access_policy, 2)
     >>> decrypted_message = taac.decrypt(public_parameters, decryption_keys, cipher_text, gid)
     Traceback (most recent call last):
      ...
@@ -260,11 +260,11 @@ class Taac(ABEncMultiAuth):
             print(result)
         return result
 
-    def encrypt(self, pk, gp, message, access_policy, t):
+    def encrypt(self, gp, pk, message, access_policy, t):
         """
         Encrypt the message under the given access policy for the given time period.
-        :param pk: The public keys of the attribute authorities.
         :param gp: The global parameters.
+        :param pk: The public keys of the attribute authorities.
         :param message: The message to encrypt.
         :param access_policy: The access policy to encrypt under.
         :param t: The time period to encrypt for.
@@ -395,7 +395,7 @@ if __name__ == '__main__':
     message = group.random(GT)
     access_policy = '(ONE or THREE) and (TWO or FOUR)'
     public_keys = merge_dicts(public_key1, public_key2)
-    cipher_text = taac.encrypt(public_keys, public_parameters, message, access_policy, 1)
+    cipher_text = taac.encrypt(public_parameters, public_keys, message, access_policy, 1)
 
     # Generate update keys for time period 1
     update_keys1 = taac.generate_update_keys(public_parameters, public_key1, master_key1, [], 1, attributes1)
