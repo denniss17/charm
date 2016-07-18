@@ -41,7 +41,7 @@ class BinNode(BinaryNode):
                 self.index = int(val[1])  # index
                 value = val[0]
             self.type = OpType.ATTR
-            self.attribute = value
+            self.attribute = value.upper()
 
         elif OpType.OR <= value < OpType.NONE:
             self.type = value
