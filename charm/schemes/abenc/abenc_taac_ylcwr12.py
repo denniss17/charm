@@ -59,7 +59,7 @@ class Taac(ABEncMultiAuth):
 
         Encrypt for time period 1
     >>> message = group.random(GT)
-    >>> access_policy = '(ONE or THREE) and (TWO or FOUR)'
+    >>> access_policy = '(ONE or THREE) and (TWO or FOUR) and (ONE or FOUR)'
     >>> public_keys = merge_dicts(public_key1, public_key2)
     >>> cipher_text = taac.encrypt(public_parameters, public_keys, message, access_policy, 1)
 
@@ -281,11 +281,12 @@ class Taac(ABEncMultiAuth):
         c = message * pair(gp['g'], gp['g']) ** s
         ct = {'A': access_policy, 't': t, 'c': c}
         for attribute in vshares.keys():
+            raw_attribute = self.trim_attribute_index(attribute)
             r = self.group.random(ZR)
-            c_1 = (pair(gp['g'], gp['g']) ** vshares[attribute]) * (pk[attribute]['e(g,g)^a'] ** r)
-            c_2 = (gp['g'] ** ushares[attribute]) * (pk[attribute]['g^b'] ** r)
+            c_1 = (pair(gp['g'], gp['g']) ** vshares[attribute]) * (pk[raw_attribute]['e(g,g)^a'] ** r)
+            c_2 = (gp['g'] ** ushares[attribute]) * (pk[raw_attribute]['g^b'] ** r)
             c_3 = gp['g'] ** r
-            c_4 = pk['H'](attribute, t) ** r
+            c_4 = pk['H'](raw_attribute, t) ** r
             ct[attribute] = {'c_1': c_1, 'c_2': c_2, 'c_3': c_3, 'c_4': c_4}
         if debug:
             print("Message")
@@ -293,6 +294,20 @@ class Taac(ABEncMultiAuth):
             print("Ciphertext")
             print(ct)
         return ct
+
+    @staticmethod
+    def trim_attribute_index(attribute_name):
+        """
+        Takes an attribute name and trims the index of the name, if it is present.
+
+        >>> Taac.trim_attribute_index('ONE') == 'ONE'
+        True
+        >>> Taac.trim_attribute_index('ONE_1') == 'ONE'
+        True
+        """
+        position = attribute_name.rfind("_")
+        return attribute_name[:position] if position > -1 else attribute_name
+
 
     def decryption_key_computation(self, sk, uk):
         """
