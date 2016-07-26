@@ -36,7 +36,7 @@ class DACMACS(object):
         >>> alice = dict({'id': 'alice', 'authoritySecretKeys': {}, 'keys': None})
         >>> alice['keys'], users[alice['id']] = dacmacs.registerUser(GPP)
         >>> for attr in authorityAttributes[0:-1]:
-        ...     dacmacs.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
+        ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
         >>> k = group.random(GT)
         >>> policy_str = '((ONE or THREE) and (TWO or FOUR))'
         >>> CT = dacmacs.encrypt(GPP, policy_str, k, authorities[authority1])
@@ -59,8 +59,8 @@ class DACMACS(object):
         >>> bob = dict({'id': 'bob', 'authoritySecretKeys': {}, 'keys': None})
         >>> bob['keys'], users[bob['id']] = dacmacs.registerUser(GPP)
         >>> for attr in authorityAttributes[0:-1]:
-        ...     dacmacs.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
-        ...     dacmacs.keygen(GPP, authorities[authority1], attr, users[bob['id']], bob['authoritySecretKeys'])
+        ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
+        ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, users[bob['id']], bob['authoritySecretKeys'])
         >>> k = group.random(GT)
         >>> policy_str = '((ONE or THREE) and (TWO or FOUR))'
         >>> CT = dacmacs.encrypt(GPP, policy_str, k, authorities[authority1])
