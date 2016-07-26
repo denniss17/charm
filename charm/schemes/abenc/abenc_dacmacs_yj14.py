@@ -12,12 +12,12 @@ Kan Yang, Xiaohua Jia
 :Authors:   artjomb
 :Date:      07/2014
 """
-
+from charm.toolbox.ABEncMultiAuth import ABEncMultiAuth
 from charm.toolbox.pairinggroup import PairingGroup, G1, GT, pair
 from charm.toolbox.secretutil import SecretUtil
 
 
-class DACMACS(object):
+class DACMACS(ABEncMultiAuth):
     def __init__(self, group):
         """
         Creates a new DACMACS instance.
@@ -32,9 +32,9 @@ class DACMACS(object):
         >>> authorities = {}
         >>> authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
         >>> authority1 = "authority1"
-        >>> _ = dacmacs.setupAuthority(GPP, authority1, authorityAttributes, authorities)
+        >>> _ = dacmacs.authsetup(GPP, authority1, authorityAttributes, authorities)
         >>> alice = dict({'id': 'alice', 'authoritySecretKeys': {}, 'keys': None})
-        >>> alice['keys'], users[alice['id']] = dacmacs.registerUser(GPP)
+        >>> alice['keys'], users[alice['id']] = dacmacs.register_user(GPP)
         >>> for attr in authorityAttributes[0:-1]:
         ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
         >>> k = group.random(GT)
@@ -53,11 +53,11 @@ class DACMACS(object):
         >>> authorities = {}
         >>> authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
         >>> authority1 = "authority1"
-        >>> _ = dacmacs.setupAuthority(GPP, authority1, authorityAttributes, authorities)
+        >>> _ = dacmacs.authsetup(GPP, authority1, authorityAttributes, authorities)
         >>> alice = dict({'id': 'alice', 'authoritySecretKeys': {}, 'keys': None})
-        >>> alice['keys'], users[alice['id']] = dacmacs.registerUser(GPP)
+        >>> alice['keys'], users[alice['id']] = dacmacs.register_user(GPP)
         >>> bob = dict({'id': 'bob', 'authoritySecretKeys': {}, 'keys': None})
-        >>> bob['keys'], users[bob['id']] = dacmacs.registerUser(GPP)
+        >>> bob['keys'], users[bob['id']] = dacmacs.register_user(GPP)
         >>> for attr in authorityAttributes[0:-1]:
         ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
         ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, users[bob['id']], bob['authoritySecretKeys'])
@@ -87,6 +87,7 @@ class DACMACS(object):
         >>> k != PT2b
         True
         """
+        super().__init__()
         self.util = SecretUtil(group, verbose=False)  # Create Secret Sharing Scheme
         self.group = group  # type: PairingGroup
 
@@ -108,7 +109,7 @@ class DACMACS(object):
 
         return GPP, GMK
 
-    def registerUser(self, GPP):
+    def register_user(self, GPP):
         """Generate user keys (executed by the user)."""
         g = GPP['g']
         u = self.group.random()
@@ -118,7 +119,7 @@ class DACMACS(object):
 
         return ((g_u, z), {'g_z': g_z, 'u': u})  # (private, public)
 
-    def setupAuthority(self, GPP, authorityid, attributes, authorities):
+    def authsetup(self, GPP, authorityid, attributes, authorities):
         """Generate attribute authority keys (executed by attribute authority)"""
         if authorityid not in authorities:
             alpha = self.group.random()
@@ -276,10 +277,10 @@ def basicTest():
     authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
     authority1 = "authority1"
 
-    dac.setupAuthority(GPP, authority1, authorityAttributes, authorities)
+    dac.authsetup(GPP, authority1, authorityAttributes, authorities)
 
     alice = {'id': 'alice', 'authoritySecretKeys': {}, 'keys': None}
-    alice['keys'], users[alice['id']] = dac.registerUser(GPP)
+    alice['keys'], users[alice['id']] = dac.register_user(GPP)
 
     for attr in authorityAttributes[0:-1]:
         dac.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
@@ -313,13 +314,13 @@ def revokedTest():
     authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
     authority1 = "authority1"
 
-    dac.setupAuthority(GPP, authority1, authorityAttributes, authorities)
+    dac.authsetup(GPP, authority1, authorityAttributes, authorities)
 
     alice = {'id': 'alice', 'authoritySecretKeys': {}, 'keys': None}
-    alice['keys'], users[alice['id']] = dac.registerUser(GPP)
+    alice['keys'], users[alice['id']] = dac.register_user(GPP)
 
     bob = {'id': 'bob', 'authoritySecretKeys': {}, 'keys': None}
-    bob['keys'], users[bob['id']] = dac.registerUser(GPP)
+    bob['keys'], users[bob['id']] = dac.register_user(GPP)
 
     for attr in authorityAttributes[0:-1]:
         dac.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
