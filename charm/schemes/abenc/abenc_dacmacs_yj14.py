@@ -32,7 +32,7 @@ class DACMACS(object):
         >>> authorities = {}
         >>> authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
         >>> authority1 = "authority1"
-        >>> dacmacs.setupAuthority(GPP, authority1, authorityAttributes, authorities)
+        >>> _ = dacmacs.setupAuthority(GPP, authority1, authorityAttributes, authorities)
         >>> alice = dict({'id': 'alice', 'authoritySecretKeys': {}, 'keys': None})
         >>> alice['keys'], users[alice['id']] = dacmacs.registerUser(GPP)
         >>> for attr in authorityAttributes[0:-1]:
@@ -47,27 +47,27 @@ class DACMACS(object):
 
         Attribute revocation
         >>> group = PairingGroup('SS512')
-        >>> dac = DACMACS(group)
-        >>> GPP, GMK = dac.setup()
+        >>> dacmacs = DACMACS(group)
+        >>> GPP, GMK = dacmacs.setup()
         >>> users = {}  # public user data
         >>> authorities = {}
         >>> authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
         >>> authority1 = "authority1"
-        >>> dac.setupAuthority(GPP, authority1, authorityAttributes, authorities)
+        >>> _ = dacmacs.setupAuthority(GPP, authority1, authorityAttributes, authorities)
         >>> alice = dict({'id': 'alice', 'authoritySecretKeys': {}, 'keys': None})
-        >>> alice['keys'], users[alice['id']] = dac.registerUser(GPP)
+        >>> alice['keys'], users[alice['id']] = dacmacs.registerUser(GPP)
         >>> bob = dict({'id': 'bob', 'authoritySecretKeys': {}, 'keys': None})
-        >>> bob['keys'], users[bob['id']] = dac.registerUser(GPP)
+        >>> bob['keys'], users[bob['id']] = dacmacs.registerUser(GPP)
         >>> for attr in authorityAttributes[0:-1]:
-        ...     dac.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
-        ...     dac.keygen(GPP, authorities[authority1], attr, users[bob['id']], bob['authoritySecretKeys'])
+        ...     dacmacs.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
+        ...     dacmacs.keygen(GPP, authorities[authority1], attr, users[bob['id']], bob['authoritySecretKeys'])
         >>> k = group.random(GT)
         >>> policy_str = '((ONE or THREE) and (TWO or FOUR))'
-        >>> CT = dac.encrypt(GPP, policy_str, k, authorities[authority1])
-        >>> TK1a = dac.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-        >>> PT1a = dac.decrypt(CT, TK1a, alice['keys'][1])
-        >>> TK1b = dac.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
-        >>> PT1b = dac.decrypt(CT, TK1b, bob['keys'][1])
+        >>> CT = dacmacs.encrypt(GPP, policy_str, k, authorities[authority1])
+        >>> TK1a = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+        >>> PT1a = dacmacs.decrypt(CT, TK1a, alice['keys'][1])
+        >>> TK1b = dacmacs.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
+        >>> PT1b = dacmacs.decrypt(CT, TK1b, bob['keys'][1])
         >>> k == PT1a
         True
         >>> k == PT1b
@@ -75,13 +75,13 @@ class DACMACS(object):
 
         revoke bob on "ONE"
         >>> attribute = "ONE"
-        >>> UK = dac.ukeygen(GPP, authorities[authority1], attribute, users[alice['id']])
-        >>> dac.skupdate(alice['authoritySecretKeys'], attribute, UK['KUK'])
-        >>> dac.ctupdate(GPP, CT, attribute, UK['CUK'])
-        >>> TK2a = dac.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-        >>> PT2a = dac.decrypt(CT, TK2a, alice['keys'][1])
-        >>> TK2b = dac.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
-        >>> PT2b = dac.decrypt(CT, TK2b, bob['keys'][1])
+        >>> UK = dacmacs.ukeygen(GPP, authorities[authority1], attribute, users[alice['id']])
+        >>> dacmacs.skupdate(alice['authoritySecretKeys'], attribute, UK['KUK'])
+        >>> dacmacs.ctupdate(GPP, CT, attribute, UK['CUK'])
+        >>> TK2a = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+        >>> PT2a = dacmacs.decrypt(CT, TK2a, alice['keys'][1])
+        >>> TK2b = dacmacs.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
+        >>> PT2b = dacmacs.decrypt(CT, TK2b, bob['keys'][1])
         >>> k == PT2a
         True
         >>> k != PT2b
