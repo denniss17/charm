@@ -12,9 +12,23 @@ Kan Yang, Xiaohua Jia
 :Authors:   artjomb
 :Date:      07/2014
 """
+from functools import reduce
+import re
+
 from charm.toolbox.ABEncMultiAuth import ABEncMultiAuth
 from charm.toolbox.pairinggroup import PairingGroup, G1, GT, pair
 from charm.toolbox.secretutil import SecretUtil
+
+
+def merge_dicts(*dict_args):
+    """
+    Given any number of dicts, shallow copy and merge into a new dict,
+    precedence goes to key value pairs in latter dicts.
+    """
+    result = {}
+    for dictionary in dict_args:
+        result.update(dictionary)
+    return result
 
 
 class DACMACS(ABEncMultiAuth):
@@ -24,68 +38,72 @@ class DACMACS(ABEncMultiAuth):
         :param group: The pairing group to use.
 
 
-        Default use ase
+        Default use case
         >>> group = PairingGroup('SS512')
         >>> dacmacs = DACMACS(group)
         >>> GPP, GMK = dacmacs.setup()
         >>> users = {}  # public user data
-        >>> authorities = {}
-        >>> authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
-        >>> authority1 = "authority1"
-        >>> _ = dacmacs.authsetup(GPP, authority1, authorityAttributes, authorities)
-        >>> alice = dict({'id': 'alice', 'authoritySecretKeys': {}, 'keys': None})
-        >>> alice['keys'], users[alice['id']] = dacmacs.register_user(GPP)
-        >>> for attr in authorityAttributes[0:-1]:
-        ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
+        >>> authority1 = "A1"
+        >>> authority2 = "A2"
+        >>> authority1_attributes = ["ONE@A1", "TWO@A1"]
+        >>> authority2_attributes = ["THREE@A2", "FOUR@A2"]
+        >>> authority1_public, authority1_secret = dacmacs.authsetup(GPP, authority1_attributes)
+        >>> authority2_public, authority2_secret = dacmacs.authsetup(GPP, authority2_attributes)
+        >>> alice_global_public, alice_global_secret = dacmacs.register_user(GPP)
+        >>> alice_secret1 = dacmacs.keygen(GPP, authority1_secret, authority1_public, ["ONE@A1", "TWO@A1"], alice_global_public)
+        >>> alice_secret2 = dacmacs.keygen(GPP, authority2_secret, authority2_public, ["THREE@A2"], alice_global_public)
+
+        Encrypt a message
         >>> k = group.random(GT)
-        >>> policy_str = '((ONE or THREE) and (TWO or FOUR))'
-        >>> CT = dacmacs.encrypt(GPP, policy_str, k, authorities[authority1])
-        >>> TK = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-        >>> PT = dacmacs.decrypt(CT, TK, alice['keys'][1])
-        >>> k == PT
+        >>> policy_str = '((ONE@A1 or THREE@A2) and (TWO@A1 or FOUR@A2))'
+        >>> public_keys = {authority1: authority1_public, authority2: authority2_public}
+        >>> CT = dacmacs.encrypt(GPP, public_keys, k, policy_str)
+        # >>> TK = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+        # >>> PT = dacmacs.decrypt(CT, TK, alice['keys'][1])
+        # >>> k == PT
         True
 
         Attribute revocation
-        >>> group = PairingGroup('SS512')
-        >>> dacmacs = DACMACS(group)
-        >>> GPP, GMK = dacmacs.setup()
-        >>> users = {}  # public user data
-        >>> authorities = {}
-        >>> authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
-        >>> authority1 = "authority1"
-        >>> _ = dacmacs.authsetup(GPP, authority1, authorityAttributes, authorities)
-        >>> alice = dict({'id': 'alice', 'authoritySecretKeys': {}, 'keys': None})
-        >>> alice['keys'], users[alice['id']] = dacmacs.register_user(GPP)
-        >>> bob = dict({'id': 'bob', 'authoritySecretKeys': {}, 'keys': None})
-        >>> bob['keys'], users[bob['id']] = dacmacs.register_user(GPP)
-        >>> for attr in authorityAttributes[0:-1]:
-        ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
-        ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, users[bob['id']], bob['authoritySecretKeys'])
-        >>> k = group.random(GT)
-        >>> policy_str = '((ONE or THREE) and (TWO or FOUR))'
-        >>> CT = dacmacs.encrypt(GPP, policy_str, k, authorities[authority1])
-        >>> TK1a = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-        >>> PT1a = dacmacs.decrypt(CT, TK1a, alice['keys'][1])
-        >>> TK1b = dacmacs.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
-        >>> PT1b = dacmacs.decrypt(CT, TK1b, bob['keys'][1])
-        >>> k == PT1a
-        True
-        >>> k == PT1b
-        True
-
-        revoke bob on "ONE"
-        >>> attribute = "ONE"
-        >>> UK = dacmacs.ukeygen(GPP, authorities[authority1], attribute, users[alice['id']])
-        >>> dacmacs.skupdate(alice['authoritySecretKeys'], attribute, UK['KUK'])
-        >>> dacmacs.ctupdate(GPP, CT, attribute, UK['CUK'])
-        >>> TK2a = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-        >>> PT2a = dacmacs.decrypt(CT, TK2a, alice['keys'][1])
-        >>> TK2b = dacmacs.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
-        >>> PT2b = dacmacs.decrypt(CT, TK2b, bob['keys'][1])
-        >>> k == PT2a
-        True
-        >>> k != PT2b
-        True
+        # >>> group = PairingGroup('SS512')
+        # >>> dacmacs = DACMACS(group)
+        # >>> GPP, GMK = dacmacs.setup()
+        # >>> users = {}  # public user data
+        # >>> authorities = {}
+        # >>> authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
+        # >>> authority1 = "authority1"
+        # >>> authority_public1, authority_secret1  = dacmacs.authsetup(GPP, authorityAttributes)
+        # >>> alice = dict({'id': 'alice', 'authoritySecretKeys': {}, 'keys': None})
+        # >>> alice_public, alice_secret = dacmacs.register_user(GPP)
+        # >>> bob = dict({'id': 'bob', 'authoritySecretKeys': {}, 'keys': None})
+        # >>> bob_public, bob_secret = dacmacs.register_user(GPP)
+        # >>> for attr in authorityAttributes[0:-1]:
+        # ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, alice_public, alice_secret)
+        # ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, alice_public, alice_secret)
+        # >>> k = group.random(GT)
+        # >>> policy_str = '((ONE or THREE) and (TWO or FOUR))'
+        # >>> CT = dacmacs.encrypt(GPP, policy_str, k, authorities[authority1])
+        # >>> TK1a = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+        # >>> PT1a = dacmacs.decrypt(CT, TK1a, alice['keys'][1])
+        # >>> TK1b = dacmacs.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
+        # >>> PT1b = dacmacs.decrypt(CT, TK1b, bob['keys'][1])
+        # >>> k == PT1a
+        # True
+        # >>> k == PT1b
+        # True
+        #
+        # revoke bob on "ONE"
+        # >>> attribute = "ONE"
+        # >>> UK = dacmacs.ukeygen(GPP, authorities[authority1], attribute, users[alice['id']])
+        # >>> dacmacs.skupdate(alice['authoritySecretKeys'], attribute, UK['KUK'])
+        # >>> dacmacs.ctupdate(GPP, CT, attribute, UK['CUK'])
+        # >>> TK2a = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+        # >>> PT2a = dacmacs.decrypt(CT, TK2a, alice['keys'][1])
+        # >>> TK2b = dacmacs.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
+        # >>> PT2b = dacmacs.decrypt(CT, TK2b, bob['keys'][1])
+        # >>> k == PT2a
+        # True
+        # >>> k != PT2b
+        # True
         """
         super().__init__()
         self.util = SecretUtil(group, verbose=False)  # Create Secret Sharing Scheme
@@ -104,7 +122,7 @@ class DACMACS(ABEncMultiAuth):
         H = lambda x: self.group.hash(x, G1)
         a = self.group.random()
         g_a = g ** a
-        GPP = {'g': g, 'g_a': g_a, 'H': H}
+        GPP = {'g': g, 'g^a': g_a, 'H': H}
         GMK = {'a': a}
 
         return GPP, GMK
@@ -114,92 +132,91 @@ class DACMACS(ABEncMultiAuth):
         g = GPP['g']
         u = self.group.random()
         z = self.group.random()
+        # GPK_uid = g ** u
+        # GSK_uid = z
         g_u = g ** u
         g_z = g ** (1 / z)
 
-        return ((g_u, z), {'g_z': g_z, 'u': u})  # (private, public)
+        return {'g_z': g_z, 'u': u}, {'g_u': g_u, 'z': z}  # (public, private)
 
-    def authsetup(self, GPP, authorityid, attributes, authorities):
+    def authsetup(self, GPP, attributes, secret_keys=None, public_keys=None):
         """Generate attribute authority keys (executed by attribute authority)"""
-        if authorityid not in authorities:
+        if secret_keys is None or public_keys is None:
             alpha = self.group.random()
             beta = self.group.random()
             gamma = self.group.random()
-            SK = {'alpha': alpha, 'beta': beta, 'gamma': gamma}
-            PK = {
-                'e_alpha': pair(GPP['g'], GPP['g']) ** alpha,
-                'g_beta_inv': GPP['g'] ** (1 / beta),
-                'g_beta_gamma': GPP['g'] ** (gamma / beta)
+            secret_keys = {
+                'alpha': alpha,
+                'beta': beta,
+                'gamma': gamma,
+                'attr': {}
             }
-            authAttrs = {}
-            authorities[authorityid] = (SK, PK, authAttrs)
-        else:
-            SK, PK, authAttrs = authorities[authorityid]
-        for attrib in attributes:
-            if attrib in authAttrs:
+            public_keys = {
+                'e(g,g)^alpha': pair(GPP['g'], GPP['g']) ** alpha,
+                'g^(1/beta)': GPP['g'] ** (1 / beta),
+                'g^(gamma/beta)': GPP['g'] ** (gamma / beta),
+                'attr': {}
+            }
+        for attribute in attributes:
+            if attribute in secret_keys['attr'] and attribute in public_keys['attr']:
                 continue
-            versionKey = self.group.random()  # random or really 'choose' ?
-            h = GPP['H'](attrib)
-            pk = ((GPP['g'] ** versionKey) * h) ** SK['gamma']
-            authAttrs[attrib] = {
-                'VK': versionKey,  # secret
-                'PK': pk,  # public
-            }
-        return (SK, PK, authAttrs)
+            version_key = self.group.random()  # random or really 'choose' ?
+            h = GPP['H'](attribute)
+            pk = ((GPP['g'] ** version_key) * h) ** secret_keys['gamma']
+            secret_keys['attr'][attribute] = version_key
+            public_keys['attr'][attribute] = pk
+        return public_keys, secret_keys
 
-    def keygen(self, GPP, authority, attribute, userObj, USK=None):
+    def keygen(self, GPP, authority_secret, authority_public, attributes, user_public):
         """Generate user keys for a specific attribute (executed on attribute authority)"""
-        if 't' not in userObj:
-            userObj['t'] = self.group.random()  # private to AA
-        t = userObj['t']
+        t = self.group.random()
 
-        ASK, APK, authAttrs = authority
-        u = userObj
-        if USK is None:
-            USK = {}
-        if 'K' not in USK or 'L' not in USK or 'R' not in USK or 'AK' not in USK:
-            USK['K'] = \
-                (u['g_z'] ** ASK['alpha']) * \
-                (GPP['g_a'] ** u['u']) * \
-                (GPP['g_a'] ** (t / ASK['beta']))
-            USK['L'] = u['g_z'] ** (ASK['beta'] * t)
-            USK['R'] = GPP['g_a'] ** t
-            USK['AK'] = {}
-        AK = (u['g_z'] ** (ASK['beta'] * ASK['gamma'] * t)) * \
-             (authAttrs[attribute]['PK'] ** (ASK['beta'] * u['u']))
-        USK['AK'][attribute] = AK
+        USK = dict()
+        USK['K'] = \
+            (user_public['g_z'] ** authority_secret['alpha']) * \
+            (GPP['g^a'] ** user_public['u']) * \
+            (GPP['g^a'] ** (t / authority_secret['beta']))
+        USK['L'] = user_public['g_z'] ** (authority_secret['beta'] * t)
+        USK['R'] = GPP['g^a'] ** t
+        USK['AK'] = {}
+        for attribute in attributes:
+            USK['AK'][attribute] = (
+                                       user_public['g_z'] ** (
+                                           authority_secret['beta'] * authority_secret['gamma'] * t)) * (
+                                       authority_public['attr'][attribute] ** (
+                                           authority_secret['beta'] * user_public['u']))
         return USK
 
-    def encrypt(self, GPP, policy_str, k, authority):
+    def encrypt(self, GPP, pks, m, policy_string):
         """Generate the cipher-text from the content(-key) and a policy (executed by the content owner)"""
         # GPP are global parameters
         # k is the content key (group element based on AES key)
         # policy_str is the policy string
         # authority is the authority tuple
 
-        _, APK, authAttrs = authority
-
-        policy = self.util.createPolicy(policy_str)
+        policy = self.util.createPolicy(policy_string)
         secret = self.group.random()
         shares = self.util.calculateSharesList(secret, policy)
         shares = dict([(x[0].getAttributeAndIndex(), x[1]) for x in shares])
 
-        C1 = k * (APK['e_alpha'] ** secret)
+        C1 = reduce(lambda x, y: x * y['e(g,g)^alpha'], pks.values(), m) ** secret
         C2 = GPP['g'] ** secret
-        C3 = APK['g_beta_inv'] ** secret
+        # I dont know if this is correct: the paper states this incorrect
+        C3 = reduce(lambda x, y: x * y['g^(1/beta)'], pks.values(), self.group.init(1, GT)) ** secret
         C = {}
-        D = {}
-        DS = {}
+        D1 = {}
+        D2 = {}
 
         for attr, s_share in shares.items():
-            k_attr = self.util.strip_index(attr)
+            attr, auth, _ = self.unpack_attribute(attr)
+            attribute_name = "%s@%s" % (attr, auth)
             r_i = self.group.random()
-            attrPK = authAttrs[attr]
-            C[attr] = (GPP['g_a'] ** s_share) * ~(attrPK['PK'] ** r_i)
-            D[attr] = APK['g_beta_inv'] ** r_i
-            DS[attr] = ~(APK['g_beta_gamma'] ** r_i)
+            attrPK = pks[auth]['attr'][attribute_name]
+            C[attr] = (GPP['g^a'] ** s_share) * ~(attrPK ** r_i)
+            D1[attr] = pks[auth]['g^(1/beta)'] ** r_i
+            D2[attr] = ~(pks[auth]['g^(gamma/beta)'] ** r_i)
 
-        return {'C1': C1, 'C2': C2, 'C3': C3, 'C': C, 'D': D, 'DS': DS, 'policy': policy_str}
+        return {'C1': C1, 'C2': C2, 'C3': C3, 'C': C, 'D1': D1, 'D2': D2, 'policy': policy_string}
 
     def generateTK(self, GPP, CT, UASK, g_u):
         """
@@ -263,6 +280,23 @@ class DACMACS(ABEncMultiAuth):
         because of the revoked attribute (executed by cloud provider)
         """
         CT['C'][attribute] = CT['C'][attribute] * (CT['DS'][attribute] ** CUK)
+
+    def unpack_attribute(self, attribute):
+        """
+        Unpacks an attribute in attribute name, authority name and index
+        :param attribute: The attribute to unpack
+        :return: The attribute name, authority name and the attribute index, if present.
+
+        >>> group = PairingGroup('SS512')
+        >>> maabe = DACMACS(group)
+        >>> maabe.unpack_attribute('STUDENT@UT')
+        ('STUDENT', 'UT', None)
+        >>> maabe.unpack_attribute('STUDENT@UT_2')
+        ('STUDENT', 'UT', '2')
+        """
+        parts = re.split(r"[@_]", attribute)
+        assert len(parts) > 1, "No @ char in [attribute@authority] name"
+        return parts[0], parts[1], None if len(parts) < 3 else parts[2]
 
 
 def basicTest():
