@@ -42,7 +42,6 @@ class DACMACS(ABEncMultiAuth):
         >>> group = PairingGroup('SS512')
         >>> dacmacs = DACMACS(group)
         >>> GPP, GMK = dacmacs.setup()
-        >>> users = {}  # public user data
         >>> authority1 = "A1"
         >>> authority2 = "A2"
         >>> authority1_attributes = ["ONE@A1", "TWO@A1"]
@@ -58,8 +57,8 @@ class DACMACS(ABEncMultiAuth):
         >>> policy_str = '((ONE@A1 or THREE@A2) and (TWO@A1 or FOUR@A2))'
         >>> public_keys = {authority1: authority1_public, authority2: authority2_public}
         >>> CT = dacmacs.encrypt(GPP, public_keys, k, policy_str)
-        >>> alice_secret = {authority1: alice_secret1, authority2: alice_secret2}
-        >>> TK = dacmacs.generate_token(GPP, CT, alice_global_public, alice_secret)
+        >>> secret_keys = {authority1: alice_secret1, authority2: alice_secret2}
+        >>> TK = dacmacs.generate_token(GPP, CT, alice_global_public, secret_keys)
         >>> PT = dacmacs.decrypt(CT, TK, alice_global_secret)
         >>> k == PT
         True
@@ -138,7 +137,7 @@ class DACMACS(ABEncMultiAuth):
         g_u = g ** u
         g_z = g ** (1 / z)
 
-        return g_u, {'z': z, 'cert': {'g^(1/z)': g_z, 'u': u}} # (public, private)
+        return g_u, {'z': z, 'cert': {'g^(1/z)': g_z, 'u': u}}  # (public, private)
 
     def authsetup(self, GPP, attributes, secret_keys=None, public_keys=None):
         """Generate attribute authority keys (executed by attribute authority)"""
@@ -325,40 +324,35 @@ class DACMACS(ABEncMultiAuth):
 
 
 def basicTest():
-    print("RUN basicTest")
-    groupObj = PairingGroup('SS512')
-    dac = DACMACS(groupObj)
-    GPP, GMK = dac.setup()
-
-    users = {}  # public user data
-    authorities = {}
-
-    authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
-    authority1 = "authority1"
-
-    dac.authsetup(GPP, authority1, authorityAttributes, authorities)
-
-    alice = {'id': 'alice', 'authoritySecretKeys': {}, 'keys': None}
-    alice['keys'], users[alice['id']] = dac.register_user(GPP)
-
-    for attr in authorityAttributes[0:-1]:
-        dac.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
-
-    k = groupObj.random(GT)
-
-    policy_str = '((ONE or THREE) and (TWO or FOUR))'
-
-    CT = dac.encrypt(GPP, policy_str, k, authorities[authority1])
-
-    TK = dac.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-
-    PT = dac.decrypt(CT, TK, alice['keys'][1])
-
-    # print "k", k
-    # print "PT", PT
-
-    assert k == PT, 'FAILED DECRYPTION!'
-    print('SUCCESSFUL DECRYPTION')
+    group = PairingGroup('SS512')
+    dacmacs = DACMACS(group)
+    GPP, GMK = dacmacs.setup()
+    authority1 = "A1"
+    authority2 = "A2"
+    authority1_attributes = ["ONE@A1", "TWO@A1"]
+    authority2_attributes = ["THREE@A2", "FOUR@A2"]
+    authority1_public, authority1_secret = dacmacs.authsetup(GPP, authority1_attributes)
+    authority2_public, authority2_secret = dacmacs.authsetup(GPP, authority2_attributes)
+    alice_global_public, alice_global_secret = dacmacs.register_user(GPP)
+    alice_secret1 = dacmacs.keygen(GPP, authority1_secret, authority1_public, ["ONE@A1", "TWO@A1"],
+                                   alice_global_secret['cert'])
+    alice_secret2 = dacmacs.keygen(GPP, authority2_secret, authority2_public, ["THREE@A2"],
+                                   alice_global_secret['cert'])
+    k = group.random(GT)
+    print("k")
+    print(k)
+    policy_str = '((ONE@A1 or THREE@A2) and (TWO@A1 or FOUR@A2))'
+    public_keys = {authority1: authority1_public, authority2: authority2_public}
+    print("Public keys")
+    print(public_keys)
+    CT = dacmacs.encrypt(GPP, public_keys, k, policy_str)
+    secret_keys = {authority1: alice_secret1, authority2: alice_secret2}
+    print("Secret keys")
+    print(secret_keys)
+    TK = dacmacs.generate_token(GPP, CT, alice_global_public, secret_keys)
+    PT = dacmacs.decrypt(CT, TK, alice_global_secret)
+    print("Decrypted")
+    print(PT)
 
 
 def revokedTest():
@@ -428,5 +422,4 @@ def test():
 
 if __name__ == '__main__':
     basicTest()
-    revokedTest()
     # test()
