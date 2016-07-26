@@ -12,8 +12,8 @@ Kan Yang, Xiaohua Jia
 :Authors:   artjomb
 :Date:      07/2014
 """
-from functools import reduce
 import re
+from functools import reduce
 
 from charm.toolbox.ABEncMultiAuth import ABEncMultiAuth
 from charm.toolbox.pairinggroup import PairingGroup, G1, GT, pair
@@ -50,17 +50,18 @@ class DACMACS(ABEncMultiAuth):
         >>> authority1_public, authority1_secret = dacmacs.authsetup(GPP, authority1_attributes)
         >>> authority2_public, authority2_secret = dacmacs.authsetup(GPP, authority2_attributes)
         >>> alice_global_public, alice_global_secret = dacmacs.register_user(GPP)
-        >>> alice_secret1 = dacmacs.keygen(GPP, authority1_secret, authority1_public, ["ONE@A1", "TWO@A1"], alice_global_public)
-        >>> alice_secret2 = dacmacs.keygen(GPP, authority2_secret, authority2_public, ["THREE@A2"], alice_global_public)
+        >>> alice_secret1 = dacmacs.keygen(GPP, authority1_secret, authority1_public, ["ONE@A1", "TWO@A1"], alice_global_secret['cert'])
+        >>> alice_secret2 = dacmacs.keygen(GPP, authority2_secret, authority2_public, ["THREE@A2"], alice_global_secret['cert'])
 
         Encrypt a message
         >>> k = group.random(GT)
         >>> policy_str = '((ONE@A1 or THREE@A2) and (TWO@A1 or FOUR@A2))'
         >>> public_keys = {authority1: authority1_public, authority2: authority2_public}
         >>> CT = dacmacs.encrypt(GPP, public_keys, k, policy_str)
-        # >>> TK = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-        # >>> PT = dacmacs.decrypt(CT, TK, alice['keys'][1])
-        # >>> k == PT
+        >>> alice_secret = {authority1: alice_secret1, authority2: alice_secret2}
+        >>> TK = dacmacs.generate_token(GPP, CT, alice_global_public, alice_secret)
+        >>> PT = dacmacs.decrypt(CT, TK, alice_global_secret)
+        >>> k == PT
         True
 
         Attribute revocation
@@ -82,9 +83,9 @@ class DACMACS(ABEncMultiAuth):
         # >>> k = group.random(GT)
         # >>> policy_str = '((ONE or THREE) and (TWO or FOUR))'
         # >>> CT = dacmacs.encrypt(GPP, policy_str, k, authorities[authority1])
-        # >>> TK1a = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+        # >>> TK1a = dacmacs.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
         # >>> PT1a = dacmacs.decrypt(CT, TK1a, alice['keys'][1])
-        # >>> TK1b = dacmacs.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
+        # >>> TK1b = dacmacs.generate_token(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
         # >>> PT1b = dacmacs.decrypt(CT, TK1b, bob['keys'][1])
         # >>> k == PT1a
         # True
@@ -96,9 +97,9 @@ class DACMACS(ABEncMultiAuth):
         # >>> UK = dacmacs.ukeygen(GPP, authorities[authority1], attribute, users[alice['id']])
         # >>> dacmacs.skupdate(alice['authoritySecretKeys'], attribute, UK['KUK'])
         # >>> dacmacs.ctupdate(GPP, CT, attribute, UK['CUK'])
-        # >>> TK2a = dacmacs.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+        # >>> TK2a = dacmacs.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
         # >>> PT2a = dacmacs.decrypt(CT, TK2a, alice['keys'][1])
-        # >>> TK2b = dacmacs.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
+        # >>> TK2b = dacmacs.generate_token(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
         # >>> PT2b = dacmacs.decrypt(CT, TK2b, bob['keys'][1])
         # >>> k == PT2a
         # True
@@ -137,7 +138,7 @@ class DACMACS(ABEncMultiAuth):
         g_u = g ** u
         g_z = g ** (1 / z)
 
-        return {'g_z': g_z, 'u': u}, {'g_u': g_u, 'z': z}  # (public, private)
+        return g_u, {'z': z, 'cert': {'g^(1/z)': g_z, 'u': u}} # (public, private)
 
     def authsetup(self, GPP, attributes, secret_keys=None, public_keys=None):
         """Generate attribute authority keys (executed by attribute authority)"""
@@ -167,24 +168,32 @@ class DACMACS(ABEncMultiAuth):
             public_keys['attr'][attribute] = pk
         return public_keys, secret_keys
 
-    def keygen(self, GPP, authority_secret, authority_public, attributes, user_public):
-        """Generate user keys for a specific attribute (executed on attribute authority)"""
+    def keygen(self, GPP, authority_secret, authority_public, attributes, user_cert):
+        """
+        Generate user keys for specific attributes of an attribute authority (executed on attribute authority).
+        :param GPP:
+        :param authority_secret:
+        :param authority_public:
+        :param attributes:
+        :param user_public:
+        :return:
+        """
         t = self.group.random()
 
         USK = dict()
         USK['K'] = \
-            (user_public['g_z'] ** authority_secret['alpha']) * \
-            (GPP['g^a'] ** user_public['u']) * \
+            (user_cert['g^(1/z)'] ** authority_secret['alpha']) * \
+            (GPP['g^a'] ** user_cert['u']) * \
             (GPP['g^a'] ** (t / authority_secret['beta']))
-        USK['L'] = user_public['g_z'] ** (authority_secret['beta'] * t)
+        USK['L'] = user_cert['g^(1/z)'] ** (authority_secret['beta'] * t)
         USK['R'] = GPP['g^a'] ** t
         USK['AK'] = {}
         for attribute in attributes:
             USK['AK'][attribute] = (
-                                       user_public['g_z'] ** (
+                                       user_cert['g^(1/z)'] ** (
                                            authority_secret['beta'] * authority_secret['gamma'] * t)) * (
                                        authority_public['attr'][attribute] ** (
-                                           authority_secret['beta'] * user_public['u']))
+                                           authority_secret['beta'] * user_cert['u']))
         return USK
 
     def encrypt(self, GPP, pks, m, policy_string):
@@ -199,57 +208,73 @@ class DACMACS(ABEncMultiAuth):
         shares = self.util.calculateSharesList(secret, policy)
         shares = dict([(x[0].getAttributeAndIndex(), x[1]) for x in shares])
 
-        C1 = reduce(lambda x, y: x * y['e(g,g)^alpha'], pks.values(), m) ** secret
-        C2 = GPP['g'] ** secret
+        C = reduce(lambda x, y: x * y['e(g,g)^alpha'], pks.values(), m) ** secret
+        C1 = GPP['g'] ** secret
         # I dont know if this is correct: the paper states this incorrect
-        C3 = reduce(lambda x, y: x * y['g^(1/beta)'], pks.values(), self.group.init(1, GT)) ** secret
-        C = {}
+        C2 = reduce(lambda x, y: x * y['g^(1/beta)'], pks.values(), self.group.init(1, GT)) ** secret
+        Ci = {}
         D1 = {}
         D2 = {}
 
         for attr, s_share in shares.items():
-            attr, auth, _ = self.unpack_attribute(attr)
-            attribute_name = "%s@%s" % (attr, auth)
+            attribute, authority, _ = self.unpack_attribute(attr)
+            attribute_name = "%s@%s" % (attribute, authority)
             r_i = self.group.random()
-            attrPK = pks[auth]['attr'][attribute_name]
-            C[attr] = (GPP['g^a'] ** s_share) * ~(attrPK ** r_i)
-            D1[attr] = pks[auth]['g^(1/beta)'] ** r_i
-            D2[attr] = ~(pks[auth]['g^(gamma/beta)'] ** r_i)
+            attrPK = pks[authority]['attr'][attribute_name]
+            Ci[attr] = (GPP['g^a'] ** s_share) * ~(attrPK ** r_i)
+            D1[attr] = pks[authority]['g^(1/beta)'] ** r_i
+            D2[attr] = ~(pks[authority]['g^(gamma/beta)'] ** r_i)
 
-        return {'C1': C1, 'C2': C2, 'C3': C3, 'C': C, 'D1': D1, 'D2': D2, 'policy': policy_string}
+        return {'C': C, 'C1': C1, 'C2': C2, 'Ci': Ci, 'D1': D1, 'D2': D2, 'policy': policy_string}
 
-    def generateTK(self, GPP, CT, UASK, g_u):
+    def generate_token(self, GPP, CT, GPK, SK):
         """
         Generates a token using the user's attribute secret keys to offload
         the decryption process (executed by cloud provider)
+        :param GPP: The global public parameters
+        :param CT: The cipertext
+        :param GPK: The global public key of the user
+        :param SK: The secret keys of the user
+        :raise Exception: Raised when the attributes do not satisfy the policy
+        :return: A decryption token
         """
-        usr_attribs = list(UASK['AK'].keys())
+        user_attributes = reduce(lambda x, y: x + list(y['AK'].keys()), SK.values(), [])
         policy = self.util.createPolicy(CT['policy'])
-        pruned = self.util.prune(policy, usr_attribs)
-        if pruned == False:
-            return False
+        pruned = self.util.prune(policy, user_attributes)
+        if not pruned:
+            raise Exception("The attributes do not satisfy the policy")
         coeffs = self.util.getCoefficients(policy)
 
-        dividend = pair(CT['C2'], UASK['K']) * ~pair(UASK['R'], CT['C3'])
-        n_a = 1
-        divisor = 1
+        token = 1
+        n_a = len(SK)
 
-        for attr in pruned:
-            x = attr.getAttributeAndIndex()
-            y = attr.getAttribute()
-            temp = \
-                pair(CT['C'][y], g_u) * \
-                pair(CT['D'][y], UASK['AK'][y]) * \
-                pair(CT['DS'][y], UASK['L'])
-            divisor *= temp ** (coeffs[x] * n_a)
-        return dividend / divisor
+        for authority_name in SK:
+            dividend = pair(CT['C1'], SK[authority_name]['K']) * ~pair(SK[authority_name]['R'], CT['C2'])
+            divisor = 1
 
-    def decrypt(self, CT, TK, z):
+            for attr in pruned:
+                attribute_with_index = attr.getAttributeAndIndex()
+                attribute, authority, _ = self.unpack_attribute(attribute_with_index)
+                if authority == authority_name:
+                    attribute_name = "%s@%s" % (attribute, authority)
+                    temp = \
+                        pair(CT['Ci'][attribute_with_index], GPK) * \
+                        pair(CT['D1'][attribute_with_index], SK[authority]['AK'][attribute_name]) * \
+                        pair(CT['D2'][attribute_with_index], SK[authority]['L'])
+                    divisor *= temp ** (coeffs[attribute_with_index] * n_a)
+            token *= dividend / divisor
+        return token
+
+    def decrypt(self, CT, TK, GSK):
         """
         Decrypts the content(-key) from the cipher-text using the token
         and the user secret key (executed by user/content consumer)
+        :param CT: The ciphertext
+        :param TK: The decryption token
+        :param GSK: The user global secret keys
+        :return:
         """
-        return CT['C1'] / (TK ** z)
+        return CT['C'] / (TK ** GSK['z'])
 
     def ukeygen(self, GPP, authority, attribute, userObj):
         """Generate update keys for users and cloud provider (executed by attribute authority?)"""
@@ -325,7 +350,7 @@ def basicTest():
 
     CT = dac.encrypt(GPP, policy_str, k, authorities[authority1])
 
-    TK = dac.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+    TK = dac.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
 
     PT = dac.decrypt(CT, TK, alice['keys'][1])
 
@@ -366,9 +391,9 @@ def revokedTest():
 
     CT = dac.encrypt(GPP, policy_str, k, authorities[authority1])
 
-    TK1a = dac.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+    TK1a = dac.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
     PT1a = dac.decrypt(CT, TK1a, alice['keys'][1])
-    TK1b = dac.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
+    TK1b = dac.generate_token(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
     PT1b = dac.decrypt(CT, TK1b, bob['keys'][1])
 
     assert k == PT1a, 'FAILED DECRYPTION (1a)!'
@@ -381,9 +406,9 @@ def revokedTest():
     dac.skupdate(alice['authoritySecretKeys'], attribute, UK['KUK'])
     dac.ctupdate(GPP, CT, attribute, UK['CUK'])
 
-    TK2a = dac.generateTK(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
+    TK2a = dac.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
     PT2a = dac.decrypt(CT, TK2a, alice['keys'][1])
-    TK2b = dac.generateTK(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
+    TK2b = dac.generate_token(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
     PT2b = dac.decrypt(CT, TK2b, bob['keys'][1])
 
     assert k == PT2a, 'FAILED DECRYPTION (2a)!'
