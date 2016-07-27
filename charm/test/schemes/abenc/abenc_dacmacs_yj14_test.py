@@ -8,8 +8,7 @@ debug = False
 # unit test for scheme contributed by artjomb
 class DacMacs_YJ14Test(unittest.TestCase):
     def testDacmacs_YJ14(self):
-        abenc_dacmacs_yj14.basicTest()
-        abenc_dacmacs_yj14.revokedTest()
+        abenc_dacmacs_yj14.test()
 
 
 if __name__ == "__main__":
