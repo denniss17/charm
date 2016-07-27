@@ -63,47 +63,64 @@ class DACMACS(ABEncMultiAuth):
         >>> k == PT
         True
 
-        Attribute revocation
-        # >>> group = PairingGroup('SS512')
-        # >>> dacmacs = DACMACS(group)
-        # >>> GPP, GMK = dacmacs.setup()
-        # >>> users = {}  # public user data
-        # >>> authorities = {}
-        # >>> authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
-        # >>> authority1 = "authority1"
-        # >>> authority_public1, authority_secret1  = dacmacs.authsetup(GPP, authorityAttributes)
-        # >>> alice = dict({'id': 'alice', 'authoritySecretKeys': {}, 'keys': None})
-        # >>> alice_public, alice_secret = dacmacs.register_user(GPP)
-        # >>> bob = dict({'id': 'bob', 'authoritySecretKeys': {}, 'keys': None})
-        # >>> bob_public, bob_secret = dacmacs.register_user(GPP)
-        # >>> for attr in authorityAttributes[0:-1]:
-        # ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, alice_public, alice_secret)
-        # ...     _ = dacmacs.keygen(GPP, authorities[authority1], attr, alice_public, alice_secret)
-        # >>> k = group.random(GT)
-        # >>> policy_str = '((ONE or THREE) and (TWO or FOUR))'
-        # >>> CT = dacmacs.encrypt(GPP, policy_str, k, authorities[authority1])
-        # >>> TK1a = dacmacs.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-        # >>> PT1a = dacmacs.decrypt(CT, TK1a, alice['keys'][1])
-        # >>> TK1b = dacmacs.generate_token(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
-        # >>> PT1b = dacmacs.decrypt(CT, TK1b, bob['keys'][1])
-        # >>> k == PT1a
-        # True
-        # >>> k == PT1b
-        # True
-        #
-        # revoke bob on "ONE"
-        # >>> attribute = "ONE"
-        # >>> UK = dacmacs.ukeygen(GPP, authorities[authority1], attribute, users[alice['id']])
-        # >>> dacmacs.skupdate(alice['authoritySecretKeys'], attribute, UK['KUK'])
-        # >>> dacmacs.ctupdate(GPP, CT, attribute, UK['CUK'])
-        # >>> TK2a = dacmacs.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-        # >>> PT2a = dacmacs.decrypt(CT, TK2a, alice['keys'][1])
-        # >>> TK2b = dacmacs.generate_token(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
-        # >>> PT2b = dacmacs.decrypt(CT, TK2b, bob['keys'][1])
-        # >>> k == PT2a
-        # True
-        # >>> k != PT2b
-        # True
+        >>> # Central setup
+        >>> group = PairingGroup('SS512')
+        >>> dacmacs = DACMACS(group)
+        >>> GPP, GMK = dacmacs.setup()
+        >>> # Authorities setup
+        >>> authority1 = "A1"
+        >>> authority2 = "A2"
+        >>> authority1_attributes = ["ONE@A1", "TWO@A1"]
+        >>> authority2_attributes = ["THREE@A2", "FOUR@A2"]
+        >>> authority1_public, authority1_secret = dacmacs.authsetup(GPP, authority1_attributes)
+        >>> authority2_public, authority2_secret = dacmacs.authsetup(GPP, authority2_attributes)
+        >>> # Create user 'alice'
+        >>> alice_global_public, alice_global_secret = dacmacs.register_user(GPP)
+        >>> alice_secret1 = dacmacs.keygen(GPP, authority1_secret, authority1_public, ["ONE@A1", "TWO@A1"],
+        ...                                alice_global_secret['cert'])
+        >>> alice_secret2 = dacmacs.keygen(GPP, authority2_secret, authority2_public, ["THREE@A2"],
+        ...                                alice_global_secret['cert'])
+        >>> alice_secret_keys = {authority1: alice_secret1, authority2: alice_secret2}
+        >>> # Create user 'bob'
+        >>> bob_global_public, bob_global_secret = dacmacs.register_user(GPP)
+        >>> bob_secret1 = dacmacs.keygen(GPP, authority1_secret, authority1_public, ["ONE@A1", "TWO@A1"],
+        ...                                bob_global_secret['cert'])
+        >>> bob_secret2 = dacmacs.keygen(GPP, authority2_secret, authority2_public, ["THREE@A2"],
+        ...                               bob_global_secret['cert'])
+        >>> bob_secret_keys = {authority1: bob_secret1, authority2: bob_secret2}
+        >>> # Encrypt a message
+        >>> k = group.random(GT)
+        >>> policy_str = '((ONE@A1 or THREE@A2) and (TWO@A1 or FOUR@A2))'
+        >>> public_keys = {authority1: authority1_public, authority2: authority2_public}
+        >>> CT = dacmacs.encrypt(GPP, public_keys, k, policy_str)
+        >>> # Calculate tokens
+        >>> TK_alice = dacmacs.generate_token(GPP, CT, alice_global_public, alice_secret_keys)
+        >>> TK_bob = dacmacs.generate_token(GPP, CT, bob_global_public, bob_secret_keys)
+        >>> # Attempt to decrypt
+        >>> PT_alice = dacmacs.decrypt(CT, TK_alice, alice_global_secret)
+        >>> PT_bob = dacmacs.decrypt(CT, TK_bob, bob_global_secret)
+        >>> PT_alice == k
+        True
+        >>> PT_bob == k
+        True
+        >>> # Revoke "ONE@A1" from bob
+        >>> revoked_attribute = "ONE@A1"
+        >>> KUK, CUK = dacmacs.update_keygen(GPP, authority1_secret, authority1_public, revoked_attribute,
+        ...                          {'alice': alice_global_public})
+        >>> # Send the key update key only to alice
+        >>> dacmacs.sk_update(alice_secret_keys, revoked_attribute, KUK['alice'])
+        >>> # Update the ciphertext
+        >>> dacmacs.ct_update(GPP, CT, revoked_attribute, CUK)
+        >>> # Calculate tokens
+        >>> TK_alice = dacmacs.generate_token(GPP, CT, alice_global_public, alice_secret_keys)
+        >>> TK_bob = dacmacs.generate_token(GPP, CT, bob_global_public, bob_secret_keys)
+        >>> # Attempt to decrypt
+        >>> PT_alice = dacmacs.decrypt(CT, TK_alice, alice_global_secret)
+        >>> PT_bob = dacmacs.decrypt(CT, TK_bob, bob_global_secret)
+        >>> PT_alice == k
+        True
+        >>> PT_bob == k
+        False
         """
         super().__init__()
         self.util = SecretUtil(group, verbose=False)  # Create Secret Sharing Scheme
@@ -278,35 +295,44 @@ class DACMACS(ABEncMultiAuth):
         """
         return CT['C'] / (TK ** GSK['z'])
 
-    def ukeygen(self, GPP, authority, attribute, userObj):
-        """Generate update keys for users and cloud provider (executed by attribute authority?)"""
-        ASK, _, authAttrs = authority
-        oldVersionKey = authAttrs[attribute]['VK']
-        newVersionKey = oldVersionKey
-        while oldVersionKey == newVersionKey:
-            newVersionKey = self.group.random()
-        authAttrs[attribute]['VK'] = newVersionKey
+    def update_keygen(self, GPP, authority_secret, authority_public, attribute, GPKs):
+        """
+        Revoke an attribute from a user and generate update keys for users and cloud providers
+        (executed by attribute authority)
+        :param GPP: The global public parameters
+        :param authority_secret: The secret keys of the authority
+        :param authority_public: The public keys of the authority
+        :param attribute: The attribute to revoke
+        :param GPKs: A dict of user identifier to global public keys of the non-revoked users
+        :return: The users key update key (KUK) and the ciphertext update key (CUK)
+        """
+        version_key = authority_secret['attr'][attribute]
 
-        u = userObj['u']
+        # It  generates  a  new  attribute  version  key
+        new_version_key = self.group.random()
+        while version_key == new_version_key:
+            new_version_key = self.group.random()
+        authority_secret['attr'][attribute] = new_version_key
 
-        AUK = ASK['gamma'] * (newVersionKey - oldVersionKey)
-        KUK = GPP['g'] ** (u * ASK['beta'] * AUK)
-        CUK = ASK['beta'] * AUK / ASK['gamma']
+        AUK = authority_secret['gamma'] * (new_version_key - version_key)
+        KUK = {uid: GPKs[uid] ** (authority_secret['beta'] * AUK) for uid in GPKs.keys()}
+        CUK = (authority_secret['beta'] / authority_secret['gamma']) * AUK
 
-        authAttrs[attribute]['PK'] = authAttrs[attribute]['PK'] * (GPP['g'] ** AUK)
+        authority_public['attr'][attribute] = authority_public['attr'][attribute] * (GPP['g'] ** AUK)
 
-        return {'KUK': KUK, 'CUK': CUK}
+        return KUK, CUK
 
-    def skupdate(self, USK, attribute, KUK):
+    def sk_update(self, USK, attribute, KUK):
         """Updates the user attribute secret key for the specified attribute (executed by non-revoked user)"""
-        USK['AK'][attribute] = USK['AK'][attribute] * KUK
+        _, authority, _ = self.unpack_attribute(attribute)
+        USK[authority]['AK'][attribute] = USK[authority]['AK'][attribute] * KUK
 
-    def ctupdate(self, GPP, CT, attribute, CUK):
+    def ct_update(self, GPP, CT, attribute, CUK):
         """
         Updates the cipher-text using the update key,
         because of the revoked attribute (executed by cloud provider)
         """
-        CT['C'][attribute] = CT['C'][attribute] * (CT['DS'][attribute] ** CUK)
+        CT['Ci'][attribute] = CT['Ci'][attribute] * (CT['D2'][attribute] ** CUK)
 
     def unpack_attribute(self, attribute):
         """
@@ -326,109 +352,79 @@ class DACMACS(ABEncMultiAuth):
         return parts[0], parts[1], None if len(parts) < 3 else parts[2]
 
 
-def basicTest():
+def test():
+    # Central setup
     group = PairingGroup('SS512')
     dacmacs = DACMACS(group)
     GPP, GMK = dacmacs.setup()
+
+    # Authorities setup
     authority1 = "A1"
     authority2 = "A2"
     authority1_attributes = ["ONE@A1", "TWO@A1"]
     authority2_attributes = ["THREE@A2", "FOUR@A2"]
     authority1_public, authority1_secret = dacmacs.authsetup(GPP, authority1_attributes)
     authority2_public, authority2_secret = dacmacs.authsetup(GPP, authority2_attributes)
+
+    # Create user 'alice'
     alice_global_public, alice_global_secret = dacmacs.register_user(GPP)
     alice_secret1 = dacmacs.keygen(GPP, authority1_secret, authority1_public, ["ONE@A1", "TWO@A1"],
                                    alice_global_secret['cert'])
     alice_secret2 = dacmacs.keygen(GPP, authority2_secret, authority2_public, ["THREE@A2"],
                                    alice_global_secret['cert'])
+    alice_secret_keys = {authority1: alice_secret1, authority2: alice_secret2}
+
+    # Create user 'bob'
+    bob_global_public, bob_global_secret = dacmacs.register_user(GPP)
+    bob_secret1 = dacmacs.keygen(GPP, authority1_secret, authority1_public, ["ONE@A1", "TWO@A1"],
+                                 bob_global_secret['cert'])
+    bob_secret2 = dacmacs.keygen(GPP, authority2_secret, authority2_public, ["THREE@A2"],
+                                 bob_global_secret['cert'])
+    bob_secret_keys = {authority1: bob_secret1, authority2: bob_secret2}
+
+    # Encrypt a message
     k = group.random(GT)
-    print("k")
-    print(k)
     policy_str = '((ONE@A1 or THREE@A2) and (TWO@A1 or FOUR@A2))'
     public_keys = {authority1: authority1_public, authority2: authority2_public}
-    print("Public keys")
-    print(public_keys)
     CT = dacmacs.encrypt(GPP, public_keys, k, policy_str)
-    print("Ciphertext")
-    print(CT)
-    secret_keys = {authority1: alice_secret1, authority2: alice_secret2}
-    print("Secret keys")
-    print(secret_keys)
-    TK = dacmacs.generate_token(GPP, CT, alice_global_public, secret_keys)
-    print("Token")
-    print(TK)
-    PT = dacmacs.decrypt(CT, TK, alice_global_secret)
+
+    # Calculate tokens
+    TK_alice = dacmacs.generate_token(GPP, CT, alice_global_public, alice_secret_keys)
+    TK_bob = dacmacs.generate_token(GPP, CT, bob_global_public, bob_secret_keys)
+
+    # Attempt to decrypt
+    PT_alice = dacmacs.decrypt(CT, TK_alice, alice_global_secret)
+    PT_bob = dacmacs.decrypt(CT, TK_bob, bob_global_secret)
+
     print("k")
     print(k)
     print("Decrypted")
-    print(PT)
+    print(PT_alice)
+    print(PT_bob)
 
+    # Revoke "ONE@A1" from bob
+    revoked_attribute = "ONE@A1"
+    KUK, CUK = dacmacs.update_keygen(GPP, authority1_secret, authority1_public, revoked_attribute,
+                                     {'alice': alice_global_public})
+    # Send the key update key only to alice
+    dacmacs.sk_update(alice_secret_keys, revoked_attribute, KUK['alice'])
+    # Update the ciphertext
+    dacmacs.ct_update(GPP, CT, revoked_attribute, CUK)
 
-def revokedTest():
-    print("RUN revokedTest")
-    groupObj = PairingGroup('SS512')
-    dac = DACMACS(groupObj)
-    GPP, GMK = dac.setup()
+    # Calculate tokens
+    TK_alice = dacmacs.generate_token(GPP, CT, alice_global_public, alice_secret_keys)
+    TK_bob = dacmacs.generate_token(GPP, CT, bob_global_public, bob_secret_keys)
 
-    users = {}  # public user data
-    authorities = {}
+    # Attempt to decrypt
+    PT_alice = dacmacs.decrypt(CT, TK_alice, alice_global_secret)
+    PT_bob = dacmacs.decrypt(CT, TK_bob, bob_global_secret)
 
-    authorityAttributes = ["ONE", "TWO", "THREE", "FOUR"]
-    authority1 = "authority1"
-
-    dac.authsetup(GPP, authority1, authorityAttributes, authorities)
-
-    alice = {'id': 'alice', 'authoritySecretKeys': {}, 'keys': None}
-    alice['keys'], users[alice['id']] = dac.register_user(GPP)
-
-    bob = {'id': 'bob', 'authoritySecretKeys': {}, 'keys': None}
-    bob['keys'], users[bob['id']] = dac.register_user(GPP)
-
-    for attr in authorityAttributes[0:-1]:
-        dac.keygen(GPP, authorities[authority1], attr, users[alice['id']], alice['authoritySecretKeys'])
-        dac.keygen(GPP, authorities[authority1], attr, users[bob['id']], bob['authoritySecretKeys'])
-
-    k = groupObj.random(GT)
-
-    policy_str = '((ONE or THREE) and (TWO or FOUR))'
-
-    CT = dac.encrypt(GPP, policy_str, k, authorities[authority1])
-
-    TK1a = dac.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-    PT1a = dac.decrypt(CT, TK1a, alice['keys'][1])
-    TK1b = dac.generate_token(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
-    PT1b = dac.decrypt(CT, TK1b, bob['keys'][1])
-
-    assert k == PT1a, 'FAILED DECRYPTION (1a)!'
-    assert k == PT1b, 'FAILED DECRYPTION (1b)!'
-    print('SUCCESSFUL DECRYPTION 1')
-
-    # revoke bob on "ONE"
-    attribute = "ONE"
-    UK = dac.ukeygen(GPP, authorities[authority1], attribute, users[alice['id']])
-    dac.skupdate(alice['authoritySecretKeys'], attribute, UK['KUK'])
-    dac.ctupdate(GPP, CT, attribute, UK['CUK'])
-
-    TK2a = dac.generate_token(GPP, CT, alice['authoritySecretKeys'], alice['keys'][0])
-    PT2a = dac.decrypt(CT, TK2a, alice['keys'][1])
-    TK2b = dac.generate_token(GPP, CT, bob['authoritySecretKeys'], bob['keys'][0])
-    PT2b = dac.decrypt(CT, TK2b, bob['keys'][1])
-
-    assert k == PT2a, 'FAILED DECRYPTION (2a)!'
-    assert k != PT2b, 'SUCCESSFUL DECRYPTION (2b)!'
-    print('SUCCESSFUL DECRYPTION 2')
-
-
-def test():
-    groupObj = PairingGroup('SS512')
-    # k = groupObj.random()
-    # print "k", k, ~k, k * ~k
-    # g = groupObj.random(G1)
-    # print "g", g, pair(g, g)
-    # gt = groupObj.random(GT)
-    # print "gt", gt
+    print("k")
+    print(k)
+    print("Decrypted")
+    print(PT_alice)
+    print(PT_bob)
 
 
 if __name__ == '__main__':
-    basicTest()
-    # test()
+    test()
