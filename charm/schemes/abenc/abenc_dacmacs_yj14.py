@@ -402,6 +402,9 @@ def test():
     print(PT_alice)
     print(PT_bob)
 
+    assert k == PT_alice
+    assert k == PT_bob
+
     # Revoke "ONE@A1" from bob
     revoked_attribute = "ONE@A1"
     KUK, CUK = dacmacs.update_keygen(GPP, authority1_secret, authority1_public, revoked_attribute,
@@ -424,6 +427,9 @@ def test():
     print("Decrypted")
     print(PT_alice)
     print(PT_bob)
+
+    assert k == PT_alice
+    assert k != PT_bob
 
 
 if __name__ == '__main__':
