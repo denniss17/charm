@@ -210,7 +210,8 @@ class DACMACS(ABEncMultiAuth):
         C = reduce(lambda x, y: x * y['e(g,g)^alpha'], pks.values(), m) ** secret
         C1 = GPP['g'] ** secret
         # I dont know if this is correct: the paper states this incorrect
-        C2 = reduce(lambda x, y: x * y['g^(1/beta)'], pks.values(), self.group.init(1, GT)) ** secret
+        C2 = {authority_name:  pks[authority_name]['g^(1/beta)'] ** secret for authority_name in pks.keys()}
+        # C2 = reduce(lambda x, y: x * y['g^(1/beta)'], pks.values(), self.group.init(1, GT)) ** secret
         Ci = {}
         D1 = {}
         D2 = {}
@@ -248,7 +249,7 @@ class DACMACS(ABEncMultiAuth):
         n_a = len(SK)
 
         for authority_name in SK:
-            dividend = pair(CT['C1'], SK[authority_name]['K']) * ~pair(SK[authority_name]['R'], CT['C2'])
+            dividend = pair(CT['C1'], SK[authority_name]['K']) * ~pair(SK[authority_name]['R'], CT['C2'][authority_name])
             divisor = 1
 
             for attr in pruned:
@@ -341,16 +342,22 @@ def basicTest():
     k = group.random(GT)
     print("k")
     print(k)
-    policy_str = '((ONE@A1 or THREE@A2) and (TWO@A1 or FOUR@A2))'
-    public_keys = {authority1: authority1_public, authority2: authority2_public}
+    policy_str = '((ONE@A1) and (TWO@A1))'
+    public_keys = {authority1: authority1_public}
     print("Public keys")
     print(public_keys)
     CT = dacmacs.encrypt(GPP, public_keys, k, policy_str)
-    secret_keys = {authority1: alice_secret1, authority2: alice_secret2}
+    print("Ciphertext")
+    print(CT)
+    secret_keys = {authority1: alice_secret1}
     print("Secret keys")
     print(secret_keys)
     TK = dacmacs.generate_token(GPP, CT, alice_global_public, secret_keys)
+    print("Token")
+    print(TK)
     PT = dacmacs.decrypt(CT, TK, alice_global_secret)
+    print("k")
+    print(k)
     print("Decrypted")
     print(PT)
 
