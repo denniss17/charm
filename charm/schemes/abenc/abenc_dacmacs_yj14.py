@@ -207,7 +207,7 @@ class DACMACS(ABEncMultiAuth):
         shares = self.util.calculateSharesList(secret, policy)
         shares = dict([(x[0].getAttributeAndIndex(), x[1]) for x in shares])
 
-        C = reduce(lambda x, y: x * y['e(g,g)^alpha'], pks.values(), m) ** secret
+        C = m * (reduce(lambda x, y: x * y['e(g,g)^alpha'], pks.values(), 1) ** secret)
         C1 = GPP['g'] ** secret
         # I dont know if this is correct: the paper states this incorrect
         C2 = {authority_name:  pks[authority_name]['g^(1/beta)'] ** secret for authority_name in pks.keys()}
@@ -263,6 +263,7 @@ class DACMACS(ABEncMultiAuth):
                         pair(CT['D2'][attribute_with_index], SK[authority]['L'])
                     divisor *= temp ** (coeffs[attribute_with_index] * n_a)
             token *= dividend / divisor
+
         return token
 
     def decrypt(self, CT, TK, GSK):
