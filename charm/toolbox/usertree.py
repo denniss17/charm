@@ -5,6 +5,9 @@ class BinaryUserTreeNode(BinaryNode):
         super(BinaryUserTreeNode, self).__init__(value, left, right)
         self.index = index
 
+    def is_leaf(self):
+        return self.left is None and self.right is None
+
     def __str__(self):
         if self.left is None or self.right is None:
             return "%d:%s" % (self.index, str(self.value))
