@@ -18,13 +18,13 @@ class IBE_N04Test(unittest.TestCase):
         # represents public identity
         ID = "bob@mail.com"
         kID = waters.hash(ID)
-        # if debug: print("Bob's key  =>", kID)
+        #if debug: print("Bob's key  =>", kID)
         key = ibe.extract(mk, kID)
 
         M = groupObj.random(GT)
         cipher = ibe.encrypt(pk, kID, M)
         m = ibe.decrypt(pk, key, cipher)
-        # print('m    =>', m)
+        #print('m    =>', m)
 
         assert m == M, "FAILED Decryption!"
         if debug: print("Successful Decryption!!! m => '%s'" % m)

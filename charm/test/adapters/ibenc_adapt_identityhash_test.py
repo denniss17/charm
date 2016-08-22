@@ -17,7 +17,7 @@ class HashIDAdapterTest(unittest.TestCase):
 
         (pk, mk) = hashID.setup()
 
-        kID = 'waldoayo@email.com'
+        kID = 'john.doe@example.com'
         sk = hashID.extract(mk, kID)
         if debug: print("Keygen for %s" % kID)
         if debug: print(sk)

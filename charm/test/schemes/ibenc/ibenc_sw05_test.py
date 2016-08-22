@@ -10,8 +10,7 @@ class IBE_SW05_LUCTest(unittest.TestCase):
     def testIBE_SW05_LUC(self):
         # initialize the element object so that object references have global scope
         groupObj = PairingGroup('SS512')
-        n = 6;
-        d = 4
+        n = 6; d = 4
         ibe = IBE_SW05_LUC(groupObj)
         (pk, mk) = ibe.setup(n, d)
         if debug:
@@ -19,8 +18,8 @@ class IBE_SW05_LUCTest(unittest.TestCase):
             print("pk =>", pk)
             print("mk =>", mk)
 
-        w = ['insurance', 'id=2345', 'oncology', 'doctor', 'nurse', 'JHU']  # private identity
-        wPrime = ['insurance', 'id=2345', 'doctor', 'oncology', 'JHU', 'billing', 'misc']  # public identity for encrypt
+        w = ['insurance', 'id=2345', 'oncology', 'doctor', 'nurse', 'JHU'] #private identity
+        wPrime = ['insurance', 'id=2345', 'doctor', 'oncology', 'JHU', 'billing', 'misc'] #public identity for encrypt
 
         (w_hashed, sk) = ibe.extract(mk, w, pk, d, n)
 
