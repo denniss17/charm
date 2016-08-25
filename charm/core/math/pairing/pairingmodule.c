@@ -29,6 +29,13 @@
 
 #include "pairingmodule.h"
 
+#define MODULE_NAME "charm.core.math.pairing"
+#define PAIRING_NAME "charm.core.math.pairing.pairing"
+#define PAIRING_SINGLE_NAME "pairing"
+#define ELEMENT_NAME "charm.core.math.pairing.Element"
+#define ELEMENT_SINGLE_NAME "Element"
+#define ERROR_NAME "charm.core.math.pairing.Error"
+
 int exp_rule(GroupType lhs, GroupType rhs)
 {
 	if(lhs == ZR && rhs == ZR) return TRUE;
@@ -1789,7 +1796,7 @@ PyObject *PyCreateList(Operations *gBench, MeasureType type)
 
 PyTypeObject PairingType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	"pairing.Pairing",             /*tp_name*/
+	PAIRING_NAME,             /*tp_name*/
 	sizeof(Pairing),         /*tp_basicsize*/
 	0,                         /*tp_itemsize*/
 	(destructor)Pairing_dealloc, /*tp_dealloc*/
@@ -1832,7 +1839,7 @@ PyTypeObject PairingType = {
 PyTypeObject PairingType = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "pairing.Pairing",             /*tp_name*/
+    PAIRING_NAME,             /*tp_name*/
     sizeof(Pairing),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     (destructor)Pairing_dealloc, /*tp_dealloc*/
@@ -1913,7 +1920,7 @@ PyNumberMethods element_number = {
 
 PyTypeObject ElementType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	"pairing.Element",             /*tp_name*/
+	ELEMENT_NAME,             /*tp_name*/
 	sizeof(Element),         /*tp_basicsize*/
 	0,                         /*tp_itemsize*/
 	(destructor)Element_dealloc, /*tp_dealloc*/
@@ -1998,7 +2005,7 @@ PyNumberMethods element_number = {
 PyTypeObject ElementType = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "pairing.Element",             /*tp_name*/
+    ELEMENT_NAME,             /*tp_name*/
     sizeof(Element),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     (destructor)Element_dealloc, /*tp_dealloc*/
@@ -2109,7 +2116,7 @@ static int pairings_free(PyObject *m) {
 
 static struct PyModuleDef moduledef = {
 	PyModuleDef_HEAD_INIT,
-	"pairing",
+	MODULE_NAME,
 	NULL,
 	sizeof(struct module_state),
 	pairing_methods,
@@ -2133,7 +2140,7 @@ void initpairing(void) 		{
 #if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&moduledef);
 #else
-    m = Py_InitModule("pairing", pairing_methods);
+    m = Py_InitModule(MODULE_NAME, pairing_methods);
 #endif
 
     if(PyType_Ready(&PairingType) < 0)
@@ -2150,16 +2157,16 @@ void initpairing(void) 		{
 #endif
 
     struct module_state *st = GETSTATE(m);
-    st->error = PyErr_NewException("pairing.Error", NULL, NULL);
+    st->error = PyErr_NewException(ERROR_NAME, NULL, NULL);
     if(st->error == NULL)
         CLEAN_EXIT;
     ElementError = st->error;
     Py_INCREF(ElementError);
 
     Py_INCREF(&ElementType);
-    PyModule_AddObject(m, "pc_element", (PyObject *)&ElementType);
+    PyModule_AddObject(m, ELEMENT_SINGLE_NAME, (PyObject *)&ElementType);
     Py_INCREF(&PairingType);
-    PyModule_AddObject(m, "pairing", (PyObject *)&PairingType);
+    PyModule_AddObject(m, PAIRING_SINGLE_NAME, (PyObject *)&PairingType);
 
 	PyModule_AddIntConstant(m, "ZR", ZR);
 	PyModule_AddIntConstant(m, "G1", G1);
@@ -2177,7 +2184,7 @@ LEAVE:
 		PyErr_Clear();
         Py_XDECREF(m);
     	INITERROR;
-    } 
+    }
 
 #if PY_MAJOR_VERSION >= 3
 	return m;
