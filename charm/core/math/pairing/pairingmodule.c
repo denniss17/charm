@@ -1757,6 +1757,11 @@ static PyObject *Get_Order(Element *self, PyObject *args) {
 	return object; /* returns a PyInt */
 }
 
+static PyObject *Element_getstate(Element *self, PyObject *args)
+{
+	return Serialize_cmp(0, PyTuple_Pack(1, self));
+}
+
 #ifdef BENCHMARK_ENABLED
 
 #define BenchmarkIdentifier 1
@@ -2060,6 +2065,7 @@ PyMemberDef Element_members[] = {
 PyMethodDef Element_methods[] = {
 	{"initPP", (PyCFunction)Element_initPP, METH_NOARGS, "Initialize the pre-processing field of element."},
 	{"set", (PyCFunction)Element_set, METH_VARARGS, "Set an element to a fixed value."},
+	{"__getstate__", (PyCFunction)Element_getstate, METH_NOARGS, "Get the current state of the element"},
     {NULL}  /* Sentinel */
 };
 
