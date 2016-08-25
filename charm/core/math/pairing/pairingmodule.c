@@ -1766,7 +1766,21 @@ static PyObject *Get_Order(Element *self, PyObject *args) {
 
 static PyObject *Element_getstate(Element *self, PyObject *args)
 {
-	return Serialize_cmp(0, PyTuple_Pack(1, self));
+	return PyTuple_Pack(2, self->pairing, Serialize_cmp(0, PyTuple_Pack(1, self)));
+}
+
+static void *Element_setstate(Element *self, PyObject *args)
+{
+	PyObject *object = Deserialize_cmp(0, args);
+
+	Element *element = (Element*) object;
+
+	self->pairing = element->pairing;
+	self->e = element->e;
+	self->element_type = element->element_type;
+	self->elem_initialized = element->elem_initialized;
+	self->e_pp = element->e_pp;
+	self->elem_initPP = element->elem_initPP;
 }
 
 #ifdef BENCHMARK_ENABLED
@@ -2073,6 +2087,7 @@ PyMethodDef Element_methods[] = {
 	{"initPP", (PyCFunction)Element_initPP, METH_NOARGS, "Initialize the pre-processing field of element."},
 	{"set", (PyCFunction)Element_set, METH_VARARGS, "Set an element to a fixed value."},
 	{"__getstate__", (PyCFunction)Element_getstate, METH_NOARGS, "Get the current state of the element"},
+	{"__setstate__", (PyCFunction)Element_setstate, METH_VARARGS, "Set the current state of the element"},
     {NULL}  /* Sentinel */
 };
 
