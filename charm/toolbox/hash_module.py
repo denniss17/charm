@@ -1,5 +1,5 @@
 import charm.core.crypto.cryptobase
-from charm.core.math.pairing import pairing,pc_element,ZR
+from charm.core.math.pairing import pairing,Element,ZR
 from charm.core.math.integer import integer,int2Bytes
 from charm.toolbox.conversion import Conversion
 from charm.toolbox.bitstring import Bytes
@@ -12,7 +12,7 @@ class Hash():
         self.group = pairingElement
         
     def hashToZn(self, value):
-        if type(value) == pc_element:
+        if type(value) == Element:
             h = hashlib.new(self.hash_type)
             h.update(self.group.serialize(value))
             #print "digest => %s" % h.hexdigest()
@@ -40,7 +40,7 @@ class Hash():
                     strs += str(base64.encodebytes(i))
                 elif type(i) == integer:
                     strs += str(base64.encodebytes(int2Bytes(i)))
-                elif type(i) == pc_element:
+                elif type(i) == Element:
                     strs += str(base64.encodebytes(self.group.serialize(i)))
 
             if len(strs) > 0:

@@ -1,6 +1,6 @@
 try:
   from charm.toolbox.pairingcurves import params as param_info
-  from charm.core.math.pairing import pairing,pc_element,ZR,G1,G2,GT,init,pair,hashPair,H,random,serialize,deserialize,ismember,order
+  from charm.core.math.pairing import pairing,ZR,G1,G2,GT,init,pair,hashPair,H,random,serialize,deserialize,ismember,order
   import charm.core.math.pairing as pg
   from charm.config import libs,pairing_lib
 except Exception as err:
