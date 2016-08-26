@@ -1769,18 +1769,31 @@ static PyObject *Element_getstate(Element *self, PyObject *args)
 	return PyTuple_Pack(2, self->pairing, Serialize_cmp(0, PyTuple_Pack(1, self)));
 }
 
-static void *Element_setstate(Element *self, PyObject *args)
+static void Element_setstate(Element *self, PyObject *args)
 {
-	PyObject *object = Deserialize_cmp(0, args);
+	//PyObject *object = Deserialize_cmp(0, args);
+
+	Element *origObject = NULL;
+	Pairing *group = NULL;
+	PyObject *object;
+	int compression = 1;
+
+	if(!PyArg_ParseTuple(args, "OO|p:deserialize", &group, &object, &compression))
+	    printf("%s", "FAILURE");
+		return NULL;
+
+	printf("%s", args);
 
 	Element *element = (Element*) object;
 
-	self->pairing = element->pairing;
+	self = element;
+
+	/*self->pairing = element->pairing;
 	self->e = element->e;
 	self->element_type = element->element_type;
 	self->elem_initialized = element->elem_initialized;
 	self->e_pp = element->e_pp;
-	self->elem_initPP = element->elem_initPP;
+	self->elem_initPP = element->elem_initPP;*/
 }
 
 #ifdef BENCHMARK_ENABLED
@@ -1964,7 +1977,7 @@ PyTypeObject ElementType = {
 	Element_members,             /* tp_members */
 	0,                         /* tp_getset */
 	0,                         /* tp_base */
-	0,                         /* tp_dict */
+	NULL,                         /* tp_dict */
 	0,                         /* tp_descr_get */
 	0,                         /* tp_descr_set */
 	0,                         /* tp_dictoffset */
@@ -2049,10 +2062,10 @@ PyTypeObject ElementType = {
     Element_members,           /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
-    0,                         /* tp_dict */
+    NULL,                         /* tp_dict */
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
-    0,                         /* tp_dictoffset */
+    NULL,                         /* tp_dictoffset */
     (initproc) Element_init,      /* tp_init */
     0,                         /* tp_alloc */
     Element_new,                 /* tp_new */
@@ -2074,12 +2087,11 @@ static struct module_state _state;
 
 // end
 PyMemberDef Element_members[] = {
-	{"type", T_INT, offsetof(Element, element_type), 0,
-		"group type"},
-    {"initialized", T_INT, offsetof(Element, elem_initialized), 0,
-		"determine initialization status"},
-    {"preproc", T_INT, offsetof(Element, elem_initPP), 0,
-		"determine pre-processing status"},
+    {"pairing", T_OBJECT_EX, offsetof(Element, pairing), 0, "pairing type"},
+    {"element", T_OBJECT_EX, offsetof(Element, e), 0, "element"},
+	{"type", T_INT, offsetof(Element, element_type), 0, "group type"},
+    {"initialized", T_INT, offsetof(Element, elem_initialized), 0, "determine initialization status"},
+    {"preproc", T_INT, offsetof(Element, elem_initPP), 0, "determine pre-processing status"},
     {NULL}  /* Sentinel */
 };
 
