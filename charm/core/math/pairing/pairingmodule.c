@@ -2055,12 +2055,11 @@ static struct module_state _state;
 
 // end
 PyMemberDef Element_members[] = {
-	{"type", T_INT, offsetof(Element, element_type), 0,
-		"group type"},
-    {"initialized", T_INT, offsetof(Element, elem_initialized), 0,
-		"determine initialization status"},
-    {"preproc", T_INT, offsetof(Element, elem_initPP), 0,
-		"determine pre-processing status"},
+	{"pairing", T_OBJECT_EX, offsetof(Element, pairing), 0, "pairing type"},
+    {"element", T_OBJECT_EX, offsetof(Element, e), 0, "element"},
+	{"type", T_INT, offsetof(Element, element_type), 0, "group type"},
+    {"initialized", T_INT, offsetof(Element, elem_initialized), 0, "determine initialization status"},
+    {"preproc", T_INT, offsetof(Element, elem_initPP), 0, "determine pre-processing status"},
     {NULL}  /* Sentinel */
 };
 
