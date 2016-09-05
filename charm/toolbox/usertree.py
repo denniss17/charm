@@ -1,5 +1,6 @@
 from charm.toolbox.node import BinaryNode
 
+
 class BinaryUserTreeNode(BinaryNode):
     def __init__(self, index, value, left=None, right=None):
         super(BinaryUserTreeNode, self).__init__(value, left, right)
@@ -13,6 +14,16 @@ class BinaryUserTreeNode(BinaryNode):
             return "%d:%s" % (self.index, str(self.value))
         else:
             return "%d:%s (%s, %s)" % (self.index, str(self.value), str(self.left), str(self.right))
+
+    def __eq__(self, other):
+        return isinstance(other, BinaryUserTreeNode) \
+               and self.index == other.index \
+               and self.value == other.value \
+               and self.left == other.left \
+               and self.right == other.right
+
+    def __hash__(self):
+        return hash((self.index, self.value, self.left, self.right))
 
 
 class BinaryUserTree:
@@ -52,6 +63,11 @@ class BinaryUserTree:
 
     def __str__(self):
         return "BinaryUserTree %s" % str(self.root)
+
+    def __eq__(self, other):
+        return isinstance(other, BinaryUserTree) \
+               and self.height == other.height \
+               and self.root == other.root
 
     def _get_path(self, index, node, height):
         if height == 1:

@@ -26,6 +26,15 @@ class BinaryNode:
         else:
             return "%s (%s, %s)" % (str(self.value), str(self.left), str(self.right))
 
+    def __eq__(self, other):
+        return isinstance(other, BinaryNode) \
+               and self.value == other.value \
+               and self.left == other.left \
+               and self.right == other.right
+
+    def __hash__(self):
+        return hash((self.value, self.left, self.right))
+
 
 class BinNode(BinaryNode):
     def __init__(self, value, left=None, right=None):
