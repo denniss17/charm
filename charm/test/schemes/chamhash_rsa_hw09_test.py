@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 import unittest
 
 from charm.schemes.chamhash_rsa_hw09 import ChamHash_HW09

@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 '''
 Generates a Blum-Williams integer, which is the product of two distinct primes
 each congruent to 3 mod 4

@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 from charm.toolbox.ABEnc import ABEnc
 from charm.schemes.abenc.abenc_bsw07 import CPabe_BSW07
 from charm.toolbox.pairinggroup import PairingGroup,GT

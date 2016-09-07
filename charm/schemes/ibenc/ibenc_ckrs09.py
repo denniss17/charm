@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 '''
 Jan Camenisch, Markulf Kohlweiss, Alfredo Rial, and Caroline Sheedy (Pairing-based)
  

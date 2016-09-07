@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 '''Takes an public-key encryption scheme and builds a hybrid encryption scheme.'''
 
 # Works for ElGamal and CS98 schemes

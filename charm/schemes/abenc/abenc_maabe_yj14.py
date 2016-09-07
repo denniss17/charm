@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 from charm.compatibility import compat_str
 '''
 Kan Yang, Xiaohua Jia 

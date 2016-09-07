@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 """ Openssl Elliptic Curve Parameters
 Run ``openssl ecparam -list_curve`` for a quick glance at the identifiers.

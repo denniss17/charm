@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 '''
 El Gamal Public Key Encryption Scheme (Decisional Diffie-Hellman Assumption in groups of prime order)
 

@@ -15,7 +15,7 @@ else:
 # >>> type(u'0-9')
 # <type 'unicode'>
 # >>> type('0-9')
-# <type 'str'> -> unicode
+# <type 'str'> -> becomes 'unicode' with __future__.unicode_literals
 # >>> type(b'0-9')
 # <type 'str'>
 # >>>

@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 # Implementing the proof of concept secret sharing
 from charm.toolbox.pairinggroup import PairingGroup,ZR,order
 

@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 from charm.toolbox.sigmaprotocol import Sigma
 from charm.toolbox.pairinggroup import ZR,G2,pair
 

@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 from charm.compatibility import compat_str
 # Implements the proof-of-concept ZK proof compiler
 # This compiler takes as input a set of public and secret inputs as well as a

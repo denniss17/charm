@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 import unittest
 
 from charm.schemes.ibenc.ibenc_lsw08 import IBE_Revoke

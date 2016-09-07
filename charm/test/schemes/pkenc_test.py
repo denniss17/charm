@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 from charm.adapters.pkenc_adapt_hybrid import HybridEnc
 from charm.adapters.pkenc_adapt_chk04 import CHK04
 from charm.adapters.pkenc_adapt_bchk05 import BCHKIBEnc

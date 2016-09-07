@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 '''
 Base class for cryptographic secure random number generation
 :authors: Gary Belvin

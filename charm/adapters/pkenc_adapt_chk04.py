@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 from charm.compatibility import compat_str
 '''
 Canetti-Halevi-Katz Public Key Encryption, IBE-to-PKE transform (generic composition of IBE+signature -> PKE)

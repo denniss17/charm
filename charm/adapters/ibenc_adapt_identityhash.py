@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 from charm.compatibility import compat_str
 from charm.compatibility import compat_bytes
 from charm.toolbox.pairinggroup import PairingGroup,ZR,G1,G2,GT,pair

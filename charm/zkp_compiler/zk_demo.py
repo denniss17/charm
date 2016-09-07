@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 from charm.toolbox.pairinggroup import PairingGroup,ZR,G1,G2,GT,pair
 from charm.zkp_compiler.zkp_generator import *
 from socket import *
