@@ -1,6 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
-from charm.compatibility import compat_bytes
+from charm.compatibility import compat_str, compat_bytes
 import string
 from charm.toolbox.enum import *
 
@@ -42,18 +41,18 @@ class BinNode:
     self.right = right
   
   def __repr__(self):
-      return str(self)
+      return compat_str(self)
   
   def __str__(self):
     if(self.type == OpType.ATTR):
         if self.negated: prefix = '!'
         else: prefix = ''
-        if self.index != None: postfix = '_' + str(self.index)
+        if self.index != None: postfix = '_' + compat_str(self.index)
         else: postfix = ''
         return prefix + self.attribute + postfix
     else:
-      left = str(self.left)
-      right = str(self.right)
+      left = compat_str(self.left)
+      right = compat_str(self.right)
       
       if(self.type == OpType.OR):
         return ('('+ left + ' or ' + right + ')')
@@ -72,7 +71,7 @@ class BinNode:
     if (self.type == OpType.ATTR):
         if self.negated: prefix = '!'
         else: prefix = ''
-        if self.index != None: postfix = '_' + str(self.index)
+        if self.index != None: postfix = '_' + compat_str(self.index)
         else: postfix = ''
         
         return prefix + self.attribute + postfix
@@ -82,7 +81,7 @@ class BinNode:
       return self
 
   def __eq__(self, other):
-      #print("checking...:", self, str(other))
+      #print("checking...:", self, compat_str(other))
       if other == None:
           return False
       if type(self) == type(other):

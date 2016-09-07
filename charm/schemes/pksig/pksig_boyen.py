@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 """
 Xavier Boyen - Anonymous Ring Signatures
 
@@ -45,7 +46,7 @@ class Boyen(PKSig):
     
     def setup(self):
         global H
-        H = lambda a: group.hash(('1', str(a)), ZR)
+        H = lambda a: group.hash(('1', compat_str(a)), ZR)
         g1, g2 = group.random(G1), group.random(G2)
         a = [group.random(ZR) for i in range(3)]
         A = []; At = [];

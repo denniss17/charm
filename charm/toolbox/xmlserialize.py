@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
+from charm.compatibility import compat_str, compat_bytes
 from charm.toolbox.pairinggroup import PairingGroup
 from charm.toolbox.ecgroup import ECGroup
 from charm.toolbox.integergroup import IntegerGroup
@@ -59,7 +59,7 @@ def getText(nodelist):
         if node.nodeType == node.TEXT_NODE:
             rc.append(node.data)
     result = ''.join(rc)
-    return bytes(result, 'utf8')
+    return compat_bytes(result, 'utf8')
 
 def parseFromXML(xmlObjectString, group=None):
     assert type(xmlObjectString) == compat_str, "Invalid type for XML object"

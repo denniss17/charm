@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''A collection of redundancy schemes'''
 from charm.toolbox.bitstring import Bytes,py3
 from charm.toolbox.securerandom import SecureRandomFactory
@@ -28,9 +29,9 @@ class InMessageRedundancy:
         byte_message = bytearray(encMessage)
 
         if(byte_message[-8:] ==  byte_message[-16:-8]):
-            return (True,bytes(byte_message[:-8]))
+            return (True,compat_bytes(byte_message[:-8]))
         else:
-            return (False,bytes(byte_message[:-8]))
+            return (False,compat_bytes(byte_message[:-8]))
 
 class ExtraBitsRedundancy:
     '''

@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''
 Xuanxia Yao, Zhi Chen, Ye Tian
  
@@ -69,7 +70,7 @@ class EKPabe(ABEnc):
         for x in attr_list:
             y = util.strip_index(x)
             d[y] = shares[x]/self.attributeSecrets[y]
-            if debug: print(str(y) + " d[y] " + str(d[y]))
+            if debug: print(compat_str(y) + " d[y] " + compat_str(d[y]))
         if debug: print("Access Policy for key: %s" % policy)
         if debug: print("Attribute list: %s" % attr_list)
         return D
@@ -127,7 +128,7 @@ def main():
 
     rec_msg = kpabe.decrypt(ciphertext, mykey)
     assert rec_msg
-    if debug: print("rec_msg=%s" % str(rec_msg))
+    if debug: print("rec_msg=%s" % compat_str(rec_msg))
 
     assert msg == rec_msg
     if debug: print("Successful Decryption!")

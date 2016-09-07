@@ -1,6 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
-from charm.compatibility import compat_bytes
+from charm.compatibility import compat_str, compat_bytes
 """
 The serialization API supports the following datatypes: dict, list, str, bytes, int, float, and whatever is supported by group.serialize and group.deserialize
 
@@ -72,7 +71,7 @@ def deserializeObject(Objects, group):
         tmp=Objects.split(':',1)
         (t,obj)=(tmp[0],tmp[1])
         if t=='compat_str':
-            return str(obj)
+            return compat_str(obj)
         elif t=='compat_bytes':
             return getBytes(obj)
     elif type(Objects) == compat_bytes:
@@ -83,7 +82,7 @@ def deserializeObject(Objects, group):
 def pickleObject(Object):
     valid_types = [compat_bytes, dict, list, compat_str, int]
     file = io.BytesIO()
-    # check that dictionary is all bytes (if not, return None)
+    # check that dictionary is all compat_bytes(if not, return None)
     if isinstance(Object, dict):
         for k in Object.keys():
             _type = type(Object[k])
@@ -118,7 +117,7 @@ def to_json(object):
 def from_json(json_object):
     if '__class__' in json_object:
         if json_object['__class__'] == 'bytes':
-            return bytes(json_object['__value__'])
+            return compat_bytes(json_object['__value__'])
         elif json_object['__class__'] == 'tuple':
             return tuple(json_object['__value__'])
     return json_object

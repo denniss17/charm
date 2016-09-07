@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''
 :Date: Jul 1, 2011
 :authors: Gary Belvin
@@ -36,7 +37,7 @@ class Test(unittest.TestCase):
         # ------------------------------
         
         # RSA modulus n:
-        n = a2b_hex(bytes('\
+        n = a2b_hex(compat_bytes('\
         bb f8 2f 09 06 82 ce 9c 23 38 ac 2b 9d a8 71 f7 \
         36 8d 07 ee d4 10 43 a4 40 d6 b6 f0 74 54 f5 1f \
         b8 df ba af 03 5c 02 ab 61 ea 48 ce eb 6f cd 48 \
@@ -52,7 +53,7 @@ class Test(unittest.TestCase):
         e = Conversion.OS2IP(e, True)
         
         # Prime p: 
-        p = a2b_hex(bytes('\
+        p = a2b_hex(compat_bytes('\
         ee cf ae 81 b1 b9 b3 c9 08 81 0b 10 a1 b5 60 01 \
         99 eb 9f 44 ae f4 fd a4 93 b8 1a 9e 3d 84 f6 32 \
         12 4e f0 23 6e 5d 1e 3b 7e 28 fa e7 aa 04 0a 2d \
@@ -60,7 +61,7 @@ class Test(unittest.TestCase):
         p = Conversion.OS2IP(p, True)
         
         # Prime q: 
-        q = a2b_hex(bytes('\
+        q = a2b_hex(compat_bytes('\
         c9 7f b1 f0 27 f4 53 f6 34 12 33 ea aa d1 d9 35 \
         3f 6c 42 d0 88 66 b1 d0 5a 0f 20 35 02 8b 9d 86 \
         98 40 b4 16 66 b4 2e 92 ea 0d a3 b4 32 04 b5 cf \
@@ -77,15 +78,15 @@ class Test(unittest.TestCase):
         # ----------------------------------
         
         # Message to be encrypted:
-        M = a2b_hex(bytes('\
+        M = a2b_hex(compat_bytes('\
         d4 36 e9 95 69 fd 32 a7 c8 a0 5b bc 90 d3 2c 49'.replace(' ',''),'utf-8'))
         
-        lhash = a2b_hex(bytes('\
+        lhash = a2b_hex(compat_bytes('\
         da 39 a3 ee 5e 6b 4b 0d 32 55 bf ef 95 60 18 90 \
         af d8 07 09'.replace(' ', ''),'utf-8'))
         
         # DB:
-        db = a2b_hex(bytes('\
+        db = a2b_hex(compat_bytes('\
         da 39 a3 ee 5e 6b 4b 0d 32 55 bf ef 95 60 18 90 \
         af d8 07 09 00 00 00 00 00 00 00 00 00 00 00 00 \
         00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 \
@@ -95,12 +96,12 @@ class Test(unittest.TestCase):
         fd 32 a7 c8 a0 5b bc 90 d3 2c 49'.replace(' ', ''),'utf-8')) 
         
         # Seed:
-        seed = a2b_hex(bytes('\
+        seed = a2b_hex(compat_bytes('\
         aa fd 12 f6 59 ca e6 34 89 b4 79 e5 07 6d de c2 \
         f0 6c b5 8f '.replace(' ',''),'utf-8'))
         
         # dbMask:
-        dbmask = a2b_hex(bytes('\
+        dbmask = a2b_hex(compat_bytes('\
         06 e1 de b2 36 9a a5 a5 c7 07 d8 2c 8e 4e 93 24 \
         8a c7 83 de e0 b2 c0 46 26 f5 af f9 3e dc fb 25 \
         c9 c2 b3 ff 8a e1 0e 83 9a 2d db 4c dc fe 4f f4 \
@@ -110,7 +111,7 @@ class Test(unittest.TestCase):
         7c fc 95 1a 51 ec d1 dd e6 12 64'.replace(' ',''),'utf-8')) 
         
         # maskedDB:
-        maskeddb = a2b_hex(bytes('\
+        maskeddb = a2b_hex(compat_bytes('\
         dc d8 7d 5c 68 f1 ee a8 f5 52 67 c3 1b 2e 8b b4 \
         25 1f 84 d7 e0 b2 c0 46 26 f5 af f9 3e dc fb 25 \
         c9 c2 b3 ff 8a e1 0e 83 9a 2d db 4c dc fe 4f f4 \
@@ -120,17 +121,17 @@ class Test(unittest.TestCase):
         81 ce 32 d2 f1 b7 6d 4d 35 3e 2d '.replace(' ',''),'utf-8'))
         
         # seedMask:
-        seedmask = a2b_hex(bytes('\
+        seedmask = a2b_hex(compat_bytes('\
         41 87 0b 5a b0 29 e6 57 d9 57 50 b5 4c 28 3c 08 \
         72 5d be a9 '.replace(' ',''),'utf-8'))
         
         # maskedSeed:
-        maskedseed = a2b_hex(bytes('\
+        maskedseed = a2b_hex(compat_bytes('\
         eb 7a 19 ac e9 e3 00 63 50 e3 29 50 4b 45 e2 ca \
         82 31 0b 26 '.replace(' ',''),'utf-8'))
         
         # EM = 00 || maskedSeed || maskedDB:
-        em = a2b_hex(bytes('\
+        em = a2b_hex(compat_bytes('\
         00 eb 7a 19 ac e9 e3 00 63 50 e3 29 50 4b 45 e2 \
         ca 82 31 0b 26 dc d8 7d 5c 68 f1 ee a8 f5 52 67 \
         c3 1b 2e 8b b4 25 1f 84 d7 e0 b2 c0 46 26 f5 af \
@@ -141,7 +142,7 @@ class Test(unittest.TestCase):
         7b c2 75 19 52 81 ce 32 d2 f1 b7 6d 4d 35 3e 2d '.replace(' ',''),'utf-8'))
             
         # Encryption:
-        enc = a2b_hex(bytes('\
+        enc = a2b_hex(compat_bytes('\
         12 53 e0 4d c0 a5 39 7b b4 4a 7a b8 7e 9b f2 a0 \
         39 a3 3d 1e 99 6f c8 2a 94 cc d3 00 74 c9 5d f7 \
         63 72 20 17 06 9e 52 68 da 5d 1c 0b 4f 87 2c f6 \
@@ -193,7 +194,7 @@ class Test(unittest.TestCase):
         # ------------------------------
         
         # RSA modulus n: 
-        n = a2b_hex(bytes('\
+        n = a2b_hex(compat_bytes('\
         a2 ba 40 ee 07 e3 b2 bd 2f 02 ce 22 7f 36 a1 95 \
         02 44 86 e4 9c 19 cb 41 bb bd fb ba 98 b2 2b 0e \
         57 7c 2e ea ff a2 0d 88 3a 76 e6 5e 39 4c 69 d4 \
@@ -205,12 +206,12 @@ class Test(unittest.TestCase):
         n = Conversion.OS2IP(n, True)
         
         # RSA public exponent e: 
-        e = a2b_hex(bytes('01 00 01'.replace(' ',''),'utf-8'))
+        e = a2b_hex(compat_bytes('01 00 01'.replace(' ',''),'utf-8'))
         e = Conversion.OS2IP(e, True)
         
         
         # Prime p: 
-        p = a2b_hex(bytes('\
+        p = a2b_hex(compat_bytes('\
         d1 7f 65 5b f2 7c 8b 16 d3 54 62 c9 05 cc 04 a2 \
         6f 37 e2 a6 7f a9 c0 ce 0d ce d4 72 39 4a 0d f7 \
         43 fe 7f 92 9e 37 8e fd b3 68 ed df f4 53 cf 00 \
@@ -218,7 +219,7 @@ class Test(unittest.TestCase):
         p = Conversion.OS2IP(p, True)
         
         # Prime q: 
-        q = a2b_hex(bytes('\
+        q = a2b_hex(compat_bytes('\
         c6 d9 2b 6f ee 74 14 d1 35 8c e1 54 6f b6 29 87 \
         53 0b 90 bd 15 e0 f1 49 63 a5 e2 63 5a db 69 34 \
         7e c0 c0 1b 2a b1 76 3f d8 ac 1a 59 2f b2 27 57 \
@@ -235,7 +236,7 @@ class Test(unittest.TestCase):
         # ---------------------------------
         
         # Message to be signed:
-        m = a2b_hex(bytes('\
+        m = a2b_hex(compat_bytes('\
         85 9e ef 2f d7 8a ca 00 30 8b dc 47 11 93 bf 55 \
         bf 9d 78 db 8f 8a 67 2b 48 46 34 f3 c9 c2 6e 64 \
         78 ae 10 26 0f e0 dd 8c 08 2e 53 a5 29 3a f2 17 \
@@ -246,28 +247,28 @@ class Test(unittest.TestCase):
         90 fc '.replace(' ',''),'utf-8'))        
         
         # mHash:
-        mHash = a2b_hex(bytes('\
+        mHash = a2b_hex(compat_bytes('\
         37 b6 6a e0 44 58 43 35 3d 47 ec b0 b4 fd 14 c1 \
         10 e6 2d 6a'.replace(' ',''),'utf-8'))
         
         # salt:
-        salt = a2b_hex(bytes('\
+        salt = a2b_hex(compat_bytes('\
         e3 b5 d5 d0 02 c1 bc e5 0c 2b 65 ef 88 a1 88 d8 \
         3b ce 7e 61'.replace(' ',''),'utf-8'))
         
         # M':
-        mPrime = a2b_hex(bytes('\
+        mPrime = a2b_hex(compat_bytes('\
         00 00 00 00 00 00 00 00 37 b6 6a e0 44 58 43 35 \
         3d 47 ec b0 b4 fd 14 c1 10 e6 2d 6a e3 b5 d5 d0 \
         02 c1 bc e5 0c 2b 65 ef 88 a1 88 d8 3b ce 7e 61'.replace(' ',''),'utf-8'))
         
         # H:
-        H = a2b_hex(bytes('\
+        H = a2b_hex(compat_bytes('\
         df 1a 89 6f 9d 8b c8 16 d9 7c d7 a2 c4 3b ad 54 \
         6f be 8c fe'.replace(' ',''),'utf-8'))
         
         # DB:
-        DB = a2b_hex(bytes('\
+        DB = a2b_hex(compat_bytes('\
         00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 \
         00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 \
         00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 \
@@ -277,7 +278,7 @@ class Test(unittest.TestCase):
         2b 65 ef 88 a1 88 d8 3b ce 7e 61'.replace(' ',''),'utf-8'))
         
         # dbMask:
-        dbMask = a2b_hex(bytes('\
+        dbMask = a2b_hex(compat_bytes('\
         66 e4 67 2e 83 6a d1 21 ba 24 4b ed 65 76 b8 67 \
         d9 a4 47 c2 8a 6e 66 a5 b8 7d ee 7f bc 7e 65 af \
         50 57 f8 6f ae 89 84 d9 ba 7f 96 9a d6 fe 02 a4 \
@@ -287,7 +288,7 @@ class Test(unittest.TestCase):
         5e 87 a4 53 5c d4 c5 9b 10 02 8d'.replace(' ',''),'utf-8'))
         
         # maskedDB:
-        maskedDB = a2b_hex(bytes('\
+        maskedDB = a2b_hex(compat_bytes('\
         66 e4 67 2e 83 6a d1 21 ba 24 4b ed 65 76 b8 67 \
         d9 a4 47 c2 8a 6e 66 a5 b8 7d ee 7f bc 7e 65 af \
         50 57 f8 6f ae 89 84 d9 ba 7f 96 9a d6 fe 02 a4 \
@@ -297,7 +298,7 @@ class Test(unittest.TestCase):
         75 e2 4b db fd 5c 1d a0 de 7c ec'.replace(' ',''),'utf-8'))
         
         # Encoded message EM:
-        EM = a2b_hex(bytes('\
+        EM = a2b_hex(compat_bytes('\
         66 e4 67 2e 83 6a d1 21 ba 24 4b ed 65 76 b8 67 \
         d9 a4 47 c2 8a 6e 66 a5 b8 7d ee 7f bc 7e 65 af \
         50 57 f8 6f ae 89 84 d9 ba 7f 96 9a d6 fe 02 a4 \
@@ -308,7 +309,7 @@ class Test(unittest.TestCase):
         8b c8 16 d9 7c d7 a2 c4 3b ad 54 6f be 8c fe bc'.replace(' ',''),'utf-8'))
         
         # Signature S, the RSA decryption of EM:
-        S = a2b_hex(bytes('\
+        S = a2b_hex(compat_bytes('\
         8d aa 62 7d 3d e7 59 5d 63 05 6c 7e c6 59 e5 44 \
         06 f1 06 10 12 8b aa e8 21 c8 b2 a0 f3 93 6d 54 \
         dc 3b dc e4 66 89 f6 b7 95 1b b1 8e 84 05 42 76 \

@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 """
 Camenisch-Hohenberger-Pedersen - Identity-based Signatures
 
@@ -36,8 +37,8 @@ class CHP(PKSig):
         
     def setup(self):
         global H,H3
-        H = lambda prefix,x: group.hash((str(prefix), str(x)), G1)
-        H3 = lambda a,b: group.hash(('3', str(a), str(b)), ZR)
+        H = lambda prefix,x: group.hash((compat_str(prefix), compat_str(x)), G1)
+        H3 = lambda a,b: group.hash(('3', compat_str(a), compat_str(b)), ZR)
         g = group.random(G2) 
         return { 'g' : g }
     

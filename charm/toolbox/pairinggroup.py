@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
+from charm.compatibility import compat_str, compat_bytes
 try:
   from charm.toolbox.pairingcurves import params as param_info
   from charm.core.math.pairing import pairing,pc_element,ZR,G1,G2,GT,init,pair,hashPair,H,random,serialize,deserialize,ismember,order
@@ -31,7 +31,7 @@ class PairingGroup():
         self._verbose = verbose
     
     def __str__(self):
-        return str(self.Pairing)
+        return compat_str(self.Pairing)
 
     def order(self):
         """returns the order of the group"""
@@ -184,4 +184,4 @@ def extract_key(g):
     :return:
     """
     g_in_hex = hashPair(g).decode('utf-8')
-    return bytes(bytearray.fromhex(g_in_hex))
+    return compat_bytes(bytearray.fromhex(g_in_hex))

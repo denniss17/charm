@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 
 # Module FSA -- methods to manipulate finite-state automata
 
@@ -445,9 +446,9 @@ class FSA:
             for state in states:
                 for s1 in self.nextStates(state, item):
                     if s1 not in newStates:
-                        transitions[ count ] = (int(state), int(s1), str(item))
+                        transitions[ count ] = (int(state), int(s1), compat_str(item))
                         count += 1
-#                        print("s1: " % (state, s1, str(item)))
+#                        print("s1: " % (state, s1, compat_str(item)))
                         newStates.append(s1)
             states = newStates
         if len(list(filter(lambda s, finals=self.finalStates:s in finals, states))) > 0:
@@ -686,7 +687,7 @@ class FSA:
         import string
         output = []
         output.append('%s {' % (self.__class__.__name__,))
-        output.append('\tinitialState = ' + str(self.initialState) + ';')
+        output.append('\tinitialState = ' + compat_str(self.initialState) + ';')
         if self.finalStates:
             output.append('\tfinalStates = ' + string.join(list(map(str, self.finalStates)), ', ') + ';')
         transitions = list(self.transitions)
@@ -972,7 +973,7 @@ def _labelIntersection(l1, l2):
         return symbolIntersection(l1, l2)
 
 def labelString(label):
-    return str(label)
+    return compat_str(label)
 
 def labelMatches(label, input):
     if hasattr(label, 'matches'): 
@@ -1107,12 +1108,12 @@ def singleton(symbol, alphabet=None, arcMetadata=None):
     fsa = FSA([0,1], alphabet, [(0, 1, symbol)], 0, [1])
     if arcMetadata:
         fsa.setArcMetadataFor((0, 1, symbol), arcMetadata)
-    fsa.label = str(symbol)
+    fsa.label = compat_str(symbol)
     return fsa
 
 def sequence(sequence, alphabet=None):
     fsa = reduce(concatenation, list(map(lambda label, alphabet=alphabet:singleton(label, alphabet), sequence)), EMPTY_STRING_FSA)
-    fsa.label = str(sequence)
+    fsa.label = compat_str(sequence)
     return fsa
 
 
@@ -1126,8 +1127,8 @@ def compileRE(s, **options):
         s = string.replace(s, ' ', '')
     fsa, index = compileREExpr(s + ')', 0, options)
     if index < len(s):
-        raise 'extra ' + str(')')
-    fsa.label = str(s)
+        raise 'extra ' + compat_str(')')
+    fsa.label = compat_str(s)
     return fsa.minimized()
 
 def compileREExpr(str, index, options):

@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''
    Marc Joye, Benoit Libert  (Aggregation Scheme)
     
@@ -49,7 +50,7 @@ class Joye():
     def destruction_keys(self,pk):
         k={}
         for i in range(self.users):
-            k['k'+str(i)]=integer(group.random(102))#exponentiation works only for small keys (needs investigation)
+            k['k'+compat_str(i)]=integer(group.random(102))#exponentiation works only for small keys (needs investigation)
         k[0]=integer(-1)*(sum(k.values())) #inverse of the sum of all user keys. Acts as annihilation for keys.
         k[1]=(sum(k.values()))           
         #self.ak=integer(1)/integer(self.r)**integer(k[0])

@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
+from charm.compatibility import compat_str, compat_bytes
 from charm.toolbox.reCompiler import *
 from charm.toolbox.FSA import FSA
 
@@ -23,7 +23,7 @@ class DFA:
         for t in T:
             # convert the CharSet to a Python string
             (x, y, s) = t 
-            newT.append( (x, y, str(s)) )
+            newT.append( (x, y, compat_str(s)) )
         Q.sort()
         alphabet = list(self.alphabet)
         return [Q, alphabet, newT, q0, F]
@@ -38,11 +38,11 @@ class DFA:
             keys = list(s.keys())
             keys.sort()
             for i in keys:
-                s_str += str(s[i])
+                s_str += compat_str(s[i])
             return fsa1.accepts(s_str)
         elif type(s) in [list, tuple, set]:
             for i in s:
-                s_str += str(i)
+                s_str += compat_str(i)
             return fsa1.accepts(s_str)
         else:
             raise ValueError("unexpected type!")
@@ -57,11 +57,11 @@ class DFA:
             keys = list(s.keys())
             keys.sort()
             for i in keys:
-                s_str += str(s[i])
+                s_str += compat_str(s[i])
             return fsa1.getTransitions(s_str)
         elif type(s) in [list, tuple, set]:
             for i in s:
-                s_str += str(i)
+                s_str += compat_str(i)
             return fsa1.getTransitions(s_str)
         else:
             raise ValueError("unexpected type!")

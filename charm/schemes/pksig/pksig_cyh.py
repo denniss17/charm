@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 """
 Chow-Yiu-Hui - Identity-based ring signatures
 
@@ -47,7 +48,7 @@ class CYH(PKSig):
 
     def setup(self):
         global H1,H2,lam_func
-        H1 = lambda x: group.hash(('1', str(x)), G1)
+        H1 = lambda x: group.hash(('1', compat_str(x)), G1)
         H2 = lambda a, b, c: group.hash(('2', a, b, c), ZR)
         lam_func = lambda i,a,b,c: a[i] * (b[i] ** c[i]) # => u * (pk ** h) for all signers
         g, alpha = group.random(G2), group.random(ZR)

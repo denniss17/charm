@@ -1,6 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
-from charm.compatibility import compat_bytes
+from charm.compatibility import compat_str, compat_bytes
 try:
    from charm.core.math.elliptic_curve import elliptic_curve,ec_element,ZR,G,init,random,order,getGenerator,bitsize,serialize,deserialize,hashEC,encode,decode,getXY
    import charm.core.math.elliptic_curve as ecc
@@ -15,7 +14,7 @@ class ECGroup():
         self._verbose = True
 
     def __str__(self):
-        return str(self.ec_group)
+        return compat_str(self.ec_group)
 
     def order(self):
         """returns the order of the group"""
@@ -64,12 +63,12 @@ class ECGroup():
     def hash(self, args, target_type=ZR):
         """hashes objects into ZR or G"""        
         if isinstance(args, tuple):
-            s = bytes()
+            s = compat_bytes()
             for i in args:
                 if type(i) == ec_element:
                     s += serialize(i)
                 elif type(i) == compat_str:
-                    s += bytes(str(i), 'utf8')
+                    s += compat_bytes(compat_str(i), 'utf8')
                 elif type(i) == compat_bytes:
                     s += i
                 else:
@@ -77,9 +76,9 @@ class ECGroup():
                 # consider other types    
             #print("s => %s" % s)
             assert len(s) != 0, "hash input is empty."
-            return hashEC(self.ec_group, str(s), target_type)
+            return hashEC(self.ec_group, compat_str(s), target_type)
         elif type(args) == ec_element:
-            msg = str(serialize(args))
+            msg = compat_str(serialize(args))
             return hashEC(self.ec_group, msg, target_type)
         elif type(args) in [compat_str, compat_bytes]:
             return hashEC(self.ec_group, args, target_type)

@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_bytes
+from charm.compatibility import compat_str, compat_bytes
 try:
   #from charm.core.math.integer import integer,randomBits,random,randomPrime,isPrime,encode,decode,hashInt,bitsize,legendre,gcd,lcm,serialize,deserialize,int2Bytes,toInt
   from charm.core.math.integer import * #InitBenchmark,StartBenchmark,EndBenchmark,GetBenchmark,GetGeneralBenchmarks,ClearBenchmark
@@ -22,8 +22,8 @@ class IntegerGroup:
     
     def __str__(self):
         outStr = ""
-        outStr += "p = " + str(self.p) + "\n"
-        outStr += "q = " + str(self.q) + "\n"
+        outStr += "p = " + compat_str(self.p) + "\n"
+        outStr += "q = " + compat_str(self.q) + "\n"
         return outStr
         
     def paramgen(self, bits, r=2):
@@ -113,8 +113,8 @@ class IntegerGroupQ:
 
     def __str__(self):
         outStr = ""
-        outStr += "p = " + str(self.p) + "\n"
-        outStr += "q = " + str(self.q) + "\n"
+        outStr += "p = " + compat_str(self.p) + "\n"
+        outStr += "q = " + compat_str(self.q) + "\n"
         return outStr
 
     def setparam(self, p, q): 
@@ -220,9 +220,9 @@ class RSAGroup:
 
     def __str__(self):
         outStr = ""
-        outStr += "p = " + str(self.p) + "\n"
-        outStr += "q = " + str(self.q) + "\n"
-        outStr += "N = " + str(self.n) + "\n"
+        outStr += "p = " + compat_str(self.p) + "\n"
+        outStr += "q = " + compat_str(self.q) + "\n"
+        outStr += "N = " + compat_str(self.n) + "\n"
         return outStr
     
     def paramgen(self, secparam):

@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''
  A Signature Scheme with Efficient Protocols
  
@@ -40,10 +41,10 @@ class Sig_CL03(PKSig):
     >>> g  = {}
     >>> m = {}
     >>> j = 16
-    >>> for i in range(1, j + 1): g[str(i)] = randomQR(public_key['N'])
-    >>> for i in range(1, j + 1): m[str(i)] = integer(SHA1(Conversion.IP2OS(random(public_key['N']))))
+    >>> for i in range(1, j + 1): g[compat_str(i)] = randomQR(public_key['N'])
+    >>> for i in range(1, j + 1): m[compat_str(i)] = integer(SHA1(Conversion.IP2OS(random(public_key['N']))))
     >>> Cx = 1 % public_key['N']
-    >>> for i in range(1, len(m) + 1): Cx = Cx*(g[str(i)] ** m[str(i)])
+    >>> for i in range(1, len(m) + 1): Cx = Cx*(g[compat_str(i)] ** m[compat_str(i)])
     >>> pksig = Sig_CL03() 
     >>> p = integer(21281327767482252741932894893985715222965623124768085901716557791820905647984944443933101657552322341359898014680608292582311911954091137905079983298534519)
     >>> q = integer(25806791860198780216123533220157510131833627659100364815258741328806284055493647951841418122944864389129382151632630375439181728665686745203837140362092027)

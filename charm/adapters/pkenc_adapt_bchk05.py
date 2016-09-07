@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_bytes
+from charm.compatibility import compat_str, compat_bytes
 '''
 Boneh-Canetti-Halevi-Katz Public Key Encryption, IBE-to-PKE transform
 
@@ -67,9 +67,9 @@ class BCHKIBEnc(IBEnc):
     def encrypt(self, pk, m):
         (k, ID, x) = encap.S(pk['pub'])
         if type(m) != compat_bytes:
-           m = bytes(m, 'utf8')	
+           m = compat_bytes(m, 'utf8')
         if type(x) != compat_bytes:
-           x = bytes(x, 'utf8')	
+           x = compat_bytes(x, 'utf8')
 
         ID2 = group.hash(ID, ZR)
 
@@ -105,7 +105,7 @@ class BCHKIBEnc(IBEnc):
         C1prime = pickleObject(serializeObject(c['C1'], group))
         
         if(c['tag'] == hmac.new(k, C1prime+c['C2'], hashlib.sha256).digest()):
-            return bytes(m2.split(':')[0], 'utf8')
+            return compat_bytes(m2.split(':')[0], 'utf8')
         else:
             return b'FALSE'
    

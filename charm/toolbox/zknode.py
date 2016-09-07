@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
+from charm.compatibility import compat_str, compat_bytes
 #!/usr/bin/python
 
 import string
@@ -30,8 +30,8 @@ class BinNode:
 		if(self.type == self.ATTR):
 			return self.attribute
 		else:			
-			left = str(self.left)
-			right = str(self.right)
+			left = compat_str(self.left)
+			right = compat_str(self.right)
 			
 			if(self.type == self.OR):
 				return ('('+ left + ') or (' + right + ')')

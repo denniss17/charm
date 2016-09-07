@@ -1,6 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
-from charm.compatibility import compat_bytes
+from charm.compatibility import compat_str, compat_bytes
 '''A collection of encryption and signature padding schemes'''
 from charm.toolbox.bitstring import Bytes,py3
 from charm.toolbox.securerandom import SecureRandomFactory
@@ -44,7 +43,7 @@ class OAEPEncryptionPadding:
         # Let PS be a string of length (emLen - mLen - 2hLen - 2) containing only zero octets.
         # Compute DB = lHash || PS || 0x01 || M.
         PS = Bytes.fill(b'\x00', emLen - len(message) - (2 * hLen) - 2)
-        DB = lHash + PS + b'\x01' + bytes(message)
+        DB = lHash + PS + b'\x01' + compat_bytes(message)
         
         # Generate a random octet string seed of length hLen and compute 
         # maskedDB = MGF1(seed, emLen - self.hashFnOutputBytes - 1)
@@ -141,9 +140,9 @@ class hashFunc:
     def __call__(self, message):
         h = self.hashObj.copy()
         if type(message) == compat_str:
-            h.update(bytes(message))
+            h.update(compat_bytes(message))
         elif type(message) in [compat_bytes, Bytes]:
-            h.update(bytes(message)) # bytes or custom Bytes
+            h.update(compat_bytes(message)) # bytes or custom Bytes
         return Bytes(h.digest())  
     
 class PSSPadding:
@@ -348,10 +347,10 @@ class SAEPEncryptionPadding:
             assert False, "message too long"
 
         if(len(message) != m):
-            message_ext = bytes(message) + Bytes.fill(b'\x80', 1)
+            message_ext = compat_bytes(message) + Bytes.fill(b'\x80', 1)
             if(len(message_ext) != m):
-                message_ext = bytes(message_ext) + Bytes.fill(b'\x00', ((m/8)-2)-len(message))
-            message_ext = bytes(message_ext) + Bytes.fill(b'\x80', 1)
+                message_ext = compat_bytes(message_ext) + Bytes.fill(b'\x00', ((m/8)-2)-len(message))
+            message_ext = compat_bytes(message_ext) + Bytes.fill(b'\x80', 1)
 
         s1 = n - m - s0
         t = Bytes.fill(b'\x00', s0/8)
@@ -359,7 +358,7 @@ class SAEPEncryptionPadding:
         rand = SecureRandomFactory.getInstance()
         r = rand.getRandomBytes(int(s1/8))
 
-        v = Bytes(bytes(message_ext) + t)
+        v = Bytes(compat_bytes(message_ext) + t)
 
         x = v ^ self.hashFn(r)
 
@@ -412,7 +411,7 @@ class PKCS7Padding(object):
         
     def encode(self,_bytes,block_size = 16):
         pad = self._padlength(_bytes)
-        return _bytes.ljust(pad+len(_bytes),bytes([pad]))
+        return _bytes.ljust(pad+len(_bytes),compat_bytes([pad]))
 
     def decode(self,_bytes):
         return _bytes[:-(_bytes[-1])]

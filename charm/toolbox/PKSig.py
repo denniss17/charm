@@ -1,4 +1,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
+
 '''
 Base class for public-key signatures
  
@@ -17,7 +19,7 @@ class PKSig(SchemeBase):
     
     def setProperty(self, secDef=None, assumption=None, messageSpace=None, secModel=None, **kwargs):
         assert secDef is not None and secDef in pksigBaseSecDefs.getList(), "not a valid security definition for this scheme type."
-        SchemeBase._setProperty(self, None, pksigBaseSecDefs[secDef], str(assumption), messageSpace, str(secModel), **kwargs)
+        SchemeBase._setProperty(self, None, pksigBaseSecDefs[secDef], compat_str(assumption), messageSpace, compat_str(secModel), **kwargs)
         return True
     
     def getProperty(self):
@@ -25,7 +27,7 @@ class PKSig(SchemeBase):
         return baseProp
     
     def checkProperty(self, schemeObj, _reqProps):
-        reqProps = [ (str(k), str(v)) for k,v in _reqProps ]
+        reqProps = [ (compat_str(k), compat_str(v)) for k,v in _reqProps ]
         result = SchemeBase._checkProperty(self, schemeObj, reqProps)
         return result
 
@@ -36,11 +38,11 @@ class PKSig(SchemeBase):
         # 2. make sure things are consistent, then update to new properties
         assert self.properties[schemeType] is not None, "scheme type wasn't specified on initialization"
         assert secDef is not None and secDef in pksigBaseSecDefs.getList(), "not a valid security definition for this scheme type."
-        SchemeBase._setProperty(self, None, pksigBaseSecDefs[secDef], str(assumption), messageSpace, str(secModel), **kwargs)
+        SchemeBase._setProperty(self, None, pksigBaseSecDefs[secDef], compat_str(assumption), messageSpace, compat_str(secModel), **kwargs)
         return
 
     def printProperties(self):
-        name = str(self.__class__).split("'")[-2].split(".")[-1]
+        name = compat_str(self.__class__).split("'")[-2].split(".")[-1]
         print("<=== %s Properties ===>" % name)
         for k,v in self.properties.items():
             print(k, ":", v)

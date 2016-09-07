@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''
 Yamada, Attrapadung, Hanaoka, Kunihiro
 
@@ -146,7 +147,7 @@ class CPABE_YAHK14(ABEnc):
                         intj = self.exp(int(xj[1:]))
                     else:
                         intj = self.exp(int(xj))
-                    b *= ( pair( ct['C_2'][x], sk['K2Dot'][str(intj)]) * pair( ct['C_3'][x], sk['K1Dot'][str(intj)]) ) ** (1 / (inti - intj))
+                    b *= ( pair( ct['C_2'][x], sk['K2Dot'][compat_str(intj)]) * pair( ct['C_3'][x], sk['K1Dot'][compat_str(intj)]) ) ** (1 / (inti - intj))
             else:
                 b = pair( ct['C_2'][x], sk['K2'][x]) * pair( ct['C_3'][x], sk['K1'][x])
             d = - z[y]

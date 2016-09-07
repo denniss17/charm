@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 """
 Camenisch-Neven-shelat - Oblivious Transfer
 
@@ -53,7 +54,7 @@ class ObliviousTransfer(Protocol):
         if messages != None:
             self.M, self.sig = [], []
             for i in range(0, len(messages)):
-                self.M.append( bytes(messages[i], 'utf8') )
+                self.M.append( compat_bytes(messages[i], 'utf8') )
                 print("bytes =>", self.M[i],", message =>", messages[i])                
 #                self.M.append(self.group.hash(messages[i], ZR))
 #                self.sig.append(messages[i])

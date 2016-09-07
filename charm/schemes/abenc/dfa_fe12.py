@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''
 Brent Waters (Pairing-based)
  
@@ -28,7 +29,7 @@ class FE_DFA:
         g, z, h_start, h_end = group.random(G1, 4)
         h = {'start':h_start, 'end':h_end }
         for sigma in alphabet:
-            h[str(sigma)] = group.random(G1)
+            h[compat_str(sigma)] = group.random(G1)
         alpha = group.random(ZR)
         
         msk = g ** -alpha
@@ -48,18 +49,18 @@ class FE_DFA:
         for t in T: # for each tuple, t in transition list
             r = group.random(ZR)
             (x, y, sigma) = t
-            K[str(t)] = {}
-            K[str(t)][1] = (D[x] ** -1) * (mpk['z'] ** r)
-            K[str(t)][2] = mpk['g'] ** r
-            K[str(t)][3] = D[y] * ((mpk['h'][str(sigma)]) ** r)
+            K[compat_str(t)] = {}
+            K[compat_str(t)][1] = (D[x] ** -1) * (mpk['z'] ** r)
+            K[compat_str(t)][2] = mpk['g'] ** r
+            K[compat_str(t)][3] = D[y] * ((mpk['h'][compat_str(sigma)]) ** r)
         
         # for each accept state in the set of all accept states
         K['end'] = {}
         for x in F:
             rx = group.random(ZR)
-            K['end'][str(x)] = {}
-            K['end'][str(x)][1] = msk * D[x] * (mpk['h']['end'] ** rx)
-            K['end'][str(x)][2] = mpk['g'] ** rx
+            K['end'][compat_str(x)] = {}
+            K['end'][compat_str(x)][1] = msk * D[x] * (mpk['h']['end'] ** rx)
+            K['end'][compat_str(x)][2] = mpk['g'] ** rx
             
         sk = {'K':K, 'dfaM':dfaM }
         return sk
@@ -77,7 +78,7 @@ class FE_DFA:
         for i in range(1, l+1):
             C[i] = {}
             C[i][1] = mpk['g'] ** s[i]
-            C[i][2] = (mpk['h'][ str(w[i]) ] ** s[i]) * (mpk['z'] ** s[i-1])
+            C[i][2] = (mpk['h'][ compat_str(w[i]) ] ** s[i]) * (mpk['z'] ** s[i-1])
         
         C['end1'] = mpk['g'] ** s[l]
         C['end2'] = mpk['h']['end'] ** s[l]        
@@ -99,10 +100,10 @@ class FE_DFA:
         for i in range(1, l+1):
             ti = Ti[i]
             if debug: print("transition: ", ti)
-            B[i] = B[i-1] * pair(C[i-1][1], K[str(ti)][1]) * (pair(C[i][2], K[str(ti)][2]) ** -1) * pair(C[i][1], K[str(ti)][3])
+            B[i] = B[i-1] * pair(C[i-1][1], K[compat_str(ti)][1]) * (pair(C[i][2], K[compat_str(ti)][2]) ** -1) * pair(C[i][1], K[compat_str(ti)][3])
         
         x = dfaObj.getAcceptState(Ti) # retrieve accept state
-        Bend = B[l] * (pair(C['end1'], K['end'][str(x)][1]) ** -1) * pair(C['end2'], K['end'][str(x)][2]) 
+        Bend = B[l] * (pair(C['end1'], K['end'][compat_str(x)][1]) ** -1) * pair(C['end2'], K['end'][compat_str(x)][2])
         M = C['m'] / Bend  
         return M
     

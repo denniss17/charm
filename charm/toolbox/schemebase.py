@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 from charm.toolbox.enum import *
 
 # user-map
@@ -55,7 +56,7 @@ class SchemeBase:
                #print(k, ":", v)
                if k in targetProps.keys():
                    # found a match
-                   if (v == str(targetProps[k])):
+                   if (v == compat_str(targetProps[k])):
                        continue
                    # criteria value is less than target value
                    elif v in baseSecModels.getList() and baseSecModels[v] < targetProps[k]:

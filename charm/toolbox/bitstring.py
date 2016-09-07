@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''
 ``bistring.Bytes`` is a replacement for Python's ``byte``.
 '''
@@ -46,5 +47,5 @@ if py3:
        return Bytes(arg1, arg2)
 else:
    def getBytes(arg1, arg2=None):
-       return bytes(arg1)
+       return compat_bytes(arg1)
 # TODO: add left and right bit shifting

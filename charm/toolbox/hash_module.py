@@ -1,6 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
-from charm.compatibility import compat_bytes
+from charm.compatibility import compat_str, compat_bytes
 import charm.core.crypto.cryptobase
 from charm.core.math.pairing import pairing,pc_element,ZR
 from charm.core.math.integer import integer,int2Bytes
@@ -38,13 +37,13 @@ class Hash():
             strs = ""
             for i in args:
                 if type(i) == compat_str:
-                    strs += str(base64.encodebytes(bytes(i, 'utf8')))
+                    strs += compat_str(base64.encodebytes(compat_bytes(i, 'utf8')))
                 elif type(i) == compat_bytes:
-                    strs += str(base64.encodebytes(i))
+                    strs += compat_str(base64.encodebytes(i))
                 elif type(i) == integer:
-                    strs += str(base64.encodebytes(int2Bytes(i)))
+                    strs += compat_str(base64.encodebytes(int2Bytes(i)))
                 elif type(i) == pc_element:
-                    strs += str(base64.encodebytes(self.group.serialize(i)))
+                    strs += compat_str(base64.encodebytes(self.group.serialize(i)))
 
             if len(strs) > 0:
                 return self.group.hash(strs, ZR)
@@ -74,7 +73,7 @@ class Waters:
 
     def sha2(self, message):
         h = self._hashObj.copy()
-        h.update(bytes(message, 'utf-8'))
+        h.update(compat_bytes(message, 'utf-8'))
         return Bytes(h.digest())    
     
     def hash(self, strID):

@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
+from charm.compatibility import compat_str, compat_bytes
 # code adapted from active state code recipes for enumeration
 def Enum(*names):
       class EnumClass(object):
@@ -13,8 +13,8 @@ def Enum(*names):
                  if index != None: return constants[index]
                  else: return None
              else: assert False, "Invalid input type."
-         def __repr__(self):        return 'Enum' + str(names)
-         def __str__(self):         return 'enum ' + str(constants)
+         def __repr__(self):        return 'Enum' + compat_str(names)
+         def __str__(self):         return 'enum ' + compat_str(constants)
          def getList(self):         return list(names)
 
       class EnumValue(object):
@@ -45,7 +45,7 @@ def Enum(*names):
              return (lhs != rhs)
          def __invert__(self):      return constants[maximum - self.__value]
          def __nonzero__(self):     return bool(self.__value)
-         def __repr__(self):        return str(names[self.__value])
+         def __repr__(self):        return compat_str(names[self.__value])
 
       maximum = len(names) - 1
       constants = [None] * len(names)
@@ -56,7 +56,7 @@ def Enum(*names):
           # create list of int => 'str'
           constants[i] = val
           # create reverse lookup 
-          lookup[str(val)] = i
+          lookup[compat_str(val)] = i
       constants = tuple(constants)
       EnumType = EnumClass()
       return EnumType

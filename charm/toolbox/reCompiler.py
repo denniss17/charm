@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
+from charm.compatibility import compat_str, compat_bytes
 """ Module re_compile -- compile a regular expression into an FSA
 
 To Do
@@ -34,7 +34,7 @@ class SymbolRECompiler:
         self.nextToken = None
         fsa = self.compileExpr()
         if self.index < len(self.str):
-            raise ValueError('extra ' + str(')'))
+            raise ValueError('extra ' + compat_str(')'))
         del self.index
         fsa.label = self.str
         if minimize:
@@ -234,7 +234,7 @@ class CharacterSet:
         if len(ranges) == 1 and ranges[0][0] == ranges[0][1]:
             return ranges[0][0]
         if ranges[0][0] == chr(0) and ranges[-1][1] == chr(255):
-            s = str(self.complement())
+            s = compat_str(self.complement())
             if s[0] == '[' and s[-1] == ']':
                 s = s[1:-1]
             return '[^' + s + ']'
@@ -252,7 +252,7 @@ class CharacterSet:
         return {'\t': '\\t', '\n': '\\n', '\r': '\\r', '\f': '\\f', '\v': '\\v'}.get(c, c)
     
     def __repr__(self):
-        return '<' + self.__class__.__name__ + ' ' + str(self) + '>'
+        return '<' + self.__class__.__name__ + ' ' + compat_str(self) + '>'
 
 METACHARS = {
         'd': CharacterSet('0-9'),

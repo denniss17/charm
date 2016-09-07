@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
+from charm.compatibility import compat_str, compat_bytes
 '''
 Qin Liu, Guojun Wang, Jie Wu
  
@@ -52,7 +52,7 @@ class TBPRE(object):
         
         Htemp = lambda x, y: self.group.hash(x + y, ZR)
         H = {
-            'user': lambda x: self.group.hash(str(x), ZR), # first convert G1 to compat_str, then hash
+            'user': lambda x: self.group.hash(compat_str(x), ZR), # first convert G1 to compat_str, then hash
             'attr': lambda x: Htemp(x,"_attribute"),
             'sy': lambda x: Htemp(x,"_year"),
             'sym': lambda x: Htemp(x,"_year_month"),

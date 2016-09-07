@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_bytes
+from charm.compatibility import compat_str, compat_bytes
 from charm.toolbox.paddingschemes import PKCS7Padding
 from charm.toolbox.securerandom import OpenSSLRand
 from charm.core.crypto.cryptobase import MODE_CBC,AES,selectPRP
@@ -42,7 +42,7 @@ class MessageAuthenticator(object):
         return {
                 "alg": self._algorithm,
                 "msg": msg, 
-                "digest": hmac.new(self._key, bytes(self._algorithm + msg, "utf-8"), digestmod=sha2).hexdigest()
+                "digest": hmac.new(self._key, compat_bytes(self._algorithm + msg, "utf-8"), digestmod=sha2).hexdigest()
                }
 
     def verify(self, msgAndDigest):
@@ -51,8 +51,8 @@ class MessageAuthenticator(object):
         """
         if msgAndDigest['alg'] != self._algorithm:
             raise ValueError("Currently only HMAC_SHA2 is supported as an algorithm")
-        expected = bytes(self.mac(msgAndDigest['msg'])['digest'], 'utf-8')
-        recieved = bytes(msgAndDigest['digest'], 'utf-8')
+        expected = compat_bytes(self.mac(msgAndDigest['msg'])['digest'], 'utf-8')
+        recieved = compat_bytes(msgAndDigest['digest'], 'utf-8')
         # we compare the hash instead of the direct value to avoid a timing attack
         return sha2(expected).digest() == sha2(recieved).digest()
 
@@ -103,12 +103,12 @@ class SymmetricCryptoAbstraction(object):
         return self.__encode_decode(data, lambda x: b64encode(x).decode('utf-8'))
 
     def _decode(self, data):
-        return self.__encode_decode(data, lambda x: b64decode(bytes(x, 'utf-8')))
+        return self.__encode_decode(data, lambda x: b64decode(compat_bytes(x, 'utf-8')))
 
     def encrypt(self, message):
         #This should be removed when all crypto functions deal with bytes"
         if type(message) != compat_bytes :
-            message = bytes(message, "utf-8")
+            message = compat_bytes(message, "utf-8")
         ct = self._encrypt(message)
         #JSON strings cannot have binary data in them, so we must base64 encode cipher
         cte = json.dumps(self._encode(ct))

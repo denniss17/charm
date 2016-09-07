@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''
 :Boneh-Lynn-Shacham Identity Based Signature
  
@@ -40,7 +41,7 @@ class BLS01(IBSig):
     def keygen(self, secparam=None):
         g, x = group.random(G2), group.random()
         g_x = g ** x
-        pk = { 'g^x':g_x, 'g':g, 'identity':str(g_x), 'secparam':secparam }
+        pk = { 'g^x':g_x, 'g':g, 'identity':compat_str(g_x), 'secparam':secparam }
         sk = { 'x':x }
         return (pk, sk)
         

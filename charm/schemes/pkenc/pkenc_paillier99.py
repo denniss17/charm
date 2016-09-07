@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
+from charm.compatibility import compat_str, compat_bytes
 '''
 Pascal Paillier (Public-Key)
  
@@ -67,7 +68,7 @@ class Ciphertext(dict):
     
     def __str__(self):
         value = dict.__str__(self)
-        return value # + ", pk =" + str(pk)
+        return value # + ", pk =" + compat_str(pk)
     
 class Pai99(PKEnc):
     def __init__(self, groupObj):

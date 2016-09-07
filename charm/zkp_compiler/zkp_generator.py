@@ -1,5 +1,5 @@
 from __future__ import absolute_import, print_function, unicode_literals
-from charm.compatibility import compat_str
+from charm.compatibility import compat_str, compat_bytes
 # Implements the proof-of-concept ZK proof compiler
 # This compiler takes as input a set of public and secret inputs as well as a
 # statement to be proved/verified.  It outputs the  
@@ -37,11 +37,11 @@ def KoDLFixedBase(publicDict, secretDict, baseVarKey, expVarKey, statesCode, int
     # First move of protocol: prover picks random integer "k", store k as a secret, output g^k
     stateDef = newStateFunction("prover_state1", False)
  #   stateDef += addToCode(["print('State PROVER 1:')"]) # DEBUG
-    stateDef += addToCode(["pk = Protocol.get(self, "+str(list(publicDict.keys()))+", dict)"])
+    stateDef += addToCode(["pk = Protocol.get(self, "+compat_str(list(publicDict.keys()))+", dict)"])
     prov_keys, obj_ret, ver_keys2, ver_keys4 = "","", "", []
     rand_elems,dl_elems,store_elems,non_int_def2 = [],[],[],""
     for i in range(len(expVarKey)):
-        k = 'k' + str(i)
+        k = 'k' + compat_str(i)
         prov_keys += expVarKey[i]+","
         rand_elems.append(k + " = self.group.random(ZR)")
         dl_elems.append("val_"+ k + " = pk['" + baseVarKey + "'] ** " + k)
@@ -51,7 +51,7 @@ def KoDLFixedBase(publicDict, secretDict, baseVarKey, expVarKey, statesCode, int
         four = 'val_'+k
         ver_keys4.append('%s' % four) # used in verify_state4
         non_int_def2 += "input['%s']," % four # used for non-interactive in state def2   
-    stateDef += addToCode(["("+prov_keys+") = Protocol.get(self, "+str(list(expVarKey))+")"])
+    stateDef += addToCode(["("+prov_keys+") = Protocol.get(self, "+compat_str(list(expVarKey))+")"])
     stateDef += addToCode(rand_elems)
     stateDef += addToCode(dl_elems)
     stateDef += addToCode(store_elems)
@@ -65,7 +65,7 @@ def KoDLFixedBase(publicDict, secretDict, baseVarKey, expVarKey, statesCode, int
     if interactive == True:
        stateDef2 += addToCode(["c = self.group.random(ZR)"])
     else:
-       stateDef2 += addToCode(["c = self.group.hash(("+str(non_int_def2)+"), ZR)"])
+       stateDef2 += addToCode(["c = self.group.hash(("+compat_str(non_int_def2)+"), ZR)"])
     stateDef2 += addToCode(["Protocol.store(self, ('c',c), ('pk',input['pk'])"+ ver_keys2 +" )", 
                             "Protocol.setState(self, 4)", "return {'c':c}"])
     statesCode += stateDef2 + "\n"
@@ -77,7 +77,7 @@ def KoDLFixedBase(publicDict, secretDict, baseVarKey, expVarKey, statesCode, int
     compute, ver_inputs = [],[]
     prf_stmt = []
     for i in range(len(expVarKey)):
-        z,k = 'z' + str(i),'k' + str(i)
+        z,k = 'z' + compat_str(i),'k' + compat_str(i)
         getVals += "'"+ expVarKey[i] +"','"+k+"',"
         compute.append(z + " = val['"+expVarKey[i]+"'] * c + val['"+k+"']")
         test_elems += "'"+z+"':"+z+","
@@ -95,7 +95,7 @@ def KoDLFixedBase(publicDict, secretDict, baseVarKey, expVarKey, statesCode, int
     pk = ['pk']
     pk.extend(ver_keys4); pk.append('c')
 
-    stateDef4 += addToCode(["val = Protocol.get(self, "+ str(pk) +", dict)"])
+    stateDef4 += addToCode(["val = Protocol.get(self, "+ compat_str(pk) +", dict)"])
     # need to compute g^z =?= g^k (val_k) * (pubkey)^c
     verify4_stmt = []
     for i in range(len(expVarKey)):
@@ -231,7 +231,7 @@ def dict_check(node, pk, sk):
 
 def write_out(name, prefix, value):
     f = open(name, 'a')
-    f.write(str(prefix) + " => " + str(value) + "\n")
+    f.write(compat_str(prefix) + " => " + compat_str(value) + "\n")
     f.close()
 
 
