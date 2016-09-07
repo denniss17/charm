@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.toolbox.schemebase import *
 
 class Hash(SchemeBase):

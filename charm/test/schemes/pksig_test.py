@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.adapters.pksig_adapt_naor01 import Sig_Generic_ibetosig_Naor01
 from charm.adapters.ibenc_adapt_identityhash import HashIDAdapter
 from charm.schemes.ibenc.ibenc_bb03 import IBE_BB04

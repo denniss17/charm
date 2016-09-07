@@ -1,4 +1,5 @@
-import unittest 
+from __future__ import absolute_import, print_function
+import unittest
 from charm.toolbox.symcrypto import SymmetricCryptoAbstraction,AuthenticatedCryptoAbstraction, MessageAuthenticator
 from charm.toolbox.pairinggroup import PairingGroup,GT
 from charm.core.math.pairing import hashPair as sha2

@@ -1,4 +1,5 @@
-""" 
+from __future__ import absolute_import, print_function
+"""
 Camenisch-Neven-shelat - Oblivious Transfer
 
 | From: "J. Camenisch, G. Neven, a. shelat - Simulatable Adaptive Oblivious Transfer"

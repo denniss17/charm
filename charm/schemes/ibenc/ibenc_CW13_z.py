@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 """
 | From:  J.Chen and H. Wee, Dual System Groups and its Applications, A Compact HIBE and More, Manuscript.
 | Published in: Manuscript

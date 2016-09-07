@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''
 NAL16 Proxy Re-Encryption
 | From: Nunez, D., Agudo, I., & Lopez, J. (2016). On the application of generic CCA-secure transformations to proxy re-encryption

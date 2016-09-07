@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 ''' Base class for attribute-based encryption multi-authority
  
  Notes: This class implements an interface for a standard attribute-based encryption scheme.

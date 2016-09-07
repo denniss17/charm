@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 
 from charm.toolbox.pairinggroup import PairingGroup,GT,extract_key
 from charm.toolbox.symcrypto import AuthenticatedCryptoAbstraction

@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.toolbox.secretshare import SecretShare
 from charm.toolbox.pairinggroup import PairingGroup,ZR
 import unittest

@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''
 Contains all the auxillary functions to do linear secret sharing (LSS) over an access structure. Mainly, we represent the 
 access structure as a binary tree. This could also support matrices for representing access structures.

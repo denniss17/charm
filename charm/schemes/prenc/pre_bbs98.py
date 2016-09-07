@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''
 BBS Proxy Re-Encryption
 | From: Blaze, M., Bleumer, G., & Strauss, M. (1998). Divertible protocols and atomic proxy cryptography.

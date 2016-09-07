@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 ''' Ateneise-Medeiros (Schnorr group-based)
  
  | From: "Ateneise-Breno de Medeiros On the Key Exposure Problem in Chameleon Hashes", Section 4.

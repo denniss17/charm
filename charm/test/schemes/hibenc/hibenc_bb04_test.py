@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.schemes.hibenc.hibenc_bb04 import HIBE_BB04
 from charm.toolbox.pairinggroup import PairingGroup, GT
 import unittest

@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.toolbox.sigmaprotocol import Sigma
 from charm.toolbox.pairinggroup import ZR,G1,pair
 

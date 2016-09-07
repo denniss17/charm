@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''
 Sahai-Waters Fuzzy Identity-Based Encryption, Original Construction
 

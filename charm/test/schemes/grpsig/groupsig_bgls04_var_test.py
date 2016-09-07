@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 import unittest
 
 from charm.schemes.grpsig.groupsig_bgls04_var import ShortSig as BGLS04_Var

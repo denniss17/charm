@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.toolbox.pairinggroup import PairingGroup
 from charm.toolbox.ecgroup import ECGroup
 from charm.toolbox.integergroup import IntegerGroup

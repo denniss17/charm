@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 import unittest
 
 from charm.schemes.chamhash_adm05 import ChamHash_Adm05

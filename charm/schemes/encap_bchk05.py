@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.core.math.integer import randomBits
 import hashlib
 

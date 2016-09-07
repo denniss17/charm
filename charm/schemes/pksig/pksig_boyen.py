@@ -1,4 +1,5 @@
-""" 
+from __future__ import absolute_import, print_function
+"""
 Xavier Boyen - Anonymous Ring Signatures
 
 | From: "X. Boyen. Mesh Signatures: How to Leak a Secret with Unwitting and Unwilling Participants"

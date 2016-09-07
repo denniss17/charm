@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''
 Goldwasser-Micali Public Key Encryption Scheme (Quadratic Residuosity problem)
 

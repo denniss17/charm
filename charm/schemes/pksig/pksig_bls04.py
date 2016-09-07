@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''
 :Boneh-Lynn-Shacham Identity Based Signature
  

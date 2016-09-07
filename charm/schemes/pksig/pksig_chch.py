@@ -1,4 +1,5 @@
-""" 
+from __future__ import absolute_import, print_function
+"""
 Jae Choon Cha and Jung Hee Cheon - Identity-based Signatures
 
 | From: "J. Cha and J. Choen - An identity-based signature from gap Diffie-Hellman groups."

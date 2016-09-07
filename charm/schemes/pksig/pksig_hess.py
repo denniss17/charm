@@ -1,4 +1,5 @@
-""" 
+from __future__ import absolute_import, print_function
+"""
 Hess - Identity-based Signatures
 
 | From: "Hess - Efficient identity based signature schemes based on pairings."

@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''
 | From: "Rivest-Shamir-Adleman Standard algorithm".
 | Published in: 1978

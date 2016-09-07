@@ -1,4 +1,5 @@
-""" 
+from __future__ import absolute_import, print_function
+"""
 Waters - Identity-based signatures
 
 | From: "B. Waters - Efficient identity-based encryption without random oracles"

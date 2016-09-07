@@ -1,4 +1,5 @@
-""" 
+from __future__ import absolute_import, print_function
+"""
 Chow-Yiu-Hui - Identity-based ring signatures
 
 | From: "S. Chow, S. Yiu and L. Hui - Efficient identity based ring signature."

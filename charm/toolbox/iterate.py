@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 
 # simple example
 #>>> a = [1,2,3,4,5]

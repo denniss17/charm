@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 import unittest
 
 from charm.schemes.abenc.abenc_bsw07 import CPabe_BSW07

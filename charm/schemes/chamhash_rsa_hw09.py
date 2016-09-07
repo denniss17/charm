@@ -1,4 +1,5 @@
-''' 
+from __future__ import absolute_import, print_function
+'''
 Hohenberger-Waters Chameleon Hash (RSA-based)
 based on the scheme of Ateneise and de Medeiros
  

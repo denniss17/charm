@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 
 from charm.core.engine.protocol import Protocol
 from charm.core.engine.util import *

@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.toolbox.symcrypto import AuthenticatedCryptoAbstraction
 from charm.toolbox.pairinggroup import PairingGroup,ZR,G1,G2,GT,pair
 from charm.core.math.pairing import hashPair as sha1

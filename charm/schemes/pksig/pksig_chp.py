@@ -1,4 +1,5 @@
-""" 
+from __future__ import absolute_import, print_function
+"""
 Camenisch-Hohenberger-Pedersen - Identity-based Signatures
 
 | From: "Camenisch, S. Hohenberger, M. Pedersen - Batch Verification of short signatures."

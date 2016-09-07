@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''
 | From: "Digitalized Signatures and Public-Key Functions as Intractable as Factorization".
 | Published in: 1979

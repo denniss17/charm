@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''
 Chandran-Chase-Vaikuntanathan : Obsfucated and Functional Re-encryption
  

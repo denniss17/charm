@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 """
 The serialization API supports the following datatypes: dict, list, str, bytes, int, float, and whatever is supported by group.serialize and group.deserialize
 

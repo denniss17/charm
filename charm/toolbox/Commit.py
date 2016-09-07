@@ -1,4 +1,5 @@
-''' Base class for commitment schemes 
+from __future__ import absolute_import, print_function
+''' Base class for commitment schemes
  
  Notes: This class implements an interface for a standard commitment scheme.
 	 A commitment scheme consists of three algorithms: (setup, commit, decommit).

@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 """ Module re_compile -- compile a regular expression into an FSA
 
 To Do

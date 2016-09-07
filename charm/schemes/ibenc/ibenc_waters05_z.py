@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''David Naccache based Identity-Based Encryption
  
 | From: "David Naccache Secure and Practical Identity-Based Encryption Section 4"

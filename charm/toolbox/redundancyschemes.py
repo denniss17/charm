@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 '''A collection of redundancy schemes'''
 from charm.toolbox.bitstring import Bytes,py3
 from charm.toolbox.securerandom import SecureRandomFactory

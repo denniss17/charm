@@ -1,4 +1,5 @@
-""" 
+from __future__ import absolute_import, print_function
+"""
 Hohenberger-Waters - Realizing hash-and-sign signatures
 
 | From: "S. Hohenberger and B. Waters - Realizing hash-and-sign signatures under standard assumptions."

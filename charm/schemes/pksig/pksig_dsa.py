@@ -1,4 +1,5 @@
-""" 
+from __future__ import absolute_import, print_function
+"""
 Digital Signature Algorithm (DSA)
 
 | From: "NIST proposed in Aug 1991 for use in DSS."

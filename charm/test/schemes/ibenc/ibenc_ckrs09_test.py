@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 import unittest
 
 from charm.schemes.ibenc.ibenc_ckrs09 import IBE_CKRS

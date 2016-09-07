@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.toolbox.reCompiler import *
 from charm.toolbox.FSA import FSA
 

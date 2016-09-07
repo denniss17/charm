@@ -1,4 +1,5 @@
-''' 
+from __future__ import absolute_import, print_function
+'''
 Groth-Sahai Commitment Scheme
  
 | From: "J. Groth, A. Sahai.  Efficient Non-interactive Proof Systems for Bilinear Groups".

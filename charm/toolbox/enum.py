@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 # code adapted from active state code recipes for enumeration
 def Enum(*names):
       class EnumClass(object):

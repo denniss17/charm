@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function
 from charm.toolbox.pairinggroup import PairingGroup,ZR,G1,G2,GT,pair
 from charm.toolbox.ecgroup import ECGroup,ZR,G
 from charm.toolbox.eccurve import prime192v2
