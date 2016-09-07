@@ -1,11 +1,11 @@
 import sys
 
-if sys.version_info >= (3,0):
-    compat_str = compat_str
+if sys.version_info >= (3, 0):
+    compat_str = str
     compat_bytes = bytes
 else:
     compat_str = unicode
-    compat_bytes = compat_str
+    compat_bytes = str
 
 
 
