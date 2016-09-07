@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 '''
 Cramer-Shoup Public Key Encryption Scheme (Decisional Diffie-Hellman Assumption in groups of prime order)
  
@@ -24,7 +25,7 @@ from charm.toolbox.PKEnc import PKEnc
 #pk_t = { 'g1' : G, 'g2' : G, 'c' : G, 'd' : G, 'h' : G }
 #sk_t = { 'x1' : ZR, 'x2' : ZR, 'y1' : ZR, 'y2' : ZR, 'z' : ZR }
 #c_t = { 'u1' : G, 'u2' : G, 'e' : G, 'v' : G }
-#str_t = str
+#str_t = compat_str
 
 debug = False
 class CS98(PKEnc):	

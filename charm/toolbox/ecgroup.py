@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 try:
    from charm.core.math.elliptic_curve import elliptic_curve,ec_element,ZR,G,init,random,order,getGenerator,bitsize,serialize,deserialize,hashEC,encode,decode,getXY
    import charm.core.math.elliptic_curve as ecc
@@ -66,7 +67,7 @@ class ECGroup():
             for i in args:
                 if type(i) == ec_element:
                     s += serialize(i)
-                elif type(i) == str:
+                elif type(i) == compat_str:
                     s += bytes(str(i), 'utf8')
                 elif type(i) == bytes:
                     s += i
@@ -79,7 +80,7 @@ class ECGroup():
         elif type(args) == ec_element:
             msg = str(serialize(args))
             return hashEC(self.ec_group, msg, target_type)
-        elif type(args) in [str, bytes]:
+        elif type(args) in [compat_str, bytes]:
             return hashEC(self.ec_group, args, target_type)
         raise Exception("ECGroup - invalid input for hash")
     
@@ -102,7 +103,7 @@ class ECGroup():
            for i in range(0, len(data)):
                print(prefix, (i+1),':',data[i])            
            print('')
-        elif type(data) == str and self._verbose:
+        elif type(data) == compat_str and self._verbose:
            print(data)
         return None
 

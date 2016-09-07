@@ -1,4 +1,7 @@
 from __future__ import absolute_import, print_function
+
+from charm.compatibility import compat_str
+
 '''
 John Bethencourt, Brent Waters (Pairing-based)
  
@@ -21,7 +24,7 @@ from charm.toolbox.ABEnc import ABEnc, Input, Output
 # type annotations
 pk_t = { 'g':G1, 'g2':G2, 'h':G1, 'f':G1, 'e_gg_alpha':GT }
 mk_t = {'beta':ZR, 'g2_alpha':G2 }
-sk_t = { 'D':G2, 'Dj':G2, 'Djp':G1, 'S':str }
+sk_t = { 'D':G2, 'Dj':G2, 'Djp':G1, 'S':compat_str }
 ct_t = { 'C_tilde':GT, 'C':G1, 'Cy':G1, 'Cyp':G2 }
 
 debug = False
@@ -61,7 +64,7 @@ class CPabe_BSW07(ABEnc):
         mk = {'beta':beta, 'g2_alpha':gp ** alpha }
         return (pk, mk)
     
-    @Input(pk_t, mk_t, [str])
+    @Input(pk_t, mk_t, [compat_str])
     @Output(sk_t)
     def keygen(self, pk, mk, S):
         r = group.random() 
@@ -74,7 +77,7 @@ class CPabe_BSW07(ABEnc):
             D_j_pr[j] = pk['g'] ** r_j
         return { 'D':D, 'Dj':D_j, 'Djp':D_j_pr, 'S':S }
     
-    @Input(pk_t, GT, str)
+    @Input(pk_t, GT, compat_str)
     @Output(ct_t)
     def encrypt(self, pk, M, policy_str): 
         policy = util.createPolicy(policy_str)

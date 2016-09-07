@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 # code adapted from active state code recipes for enumeration
 def Enum(*names):
       class EnumClass(object):
@@ -7,7 +8,7 @@ def Enum(*names):
          def __len__(self):         return len(constants)
          def __getitem__(self, i):  
              if type(i) == int: return constants[i]
-             elif type(i) == str: 
+             elif type(i) == compat_str:
                  index = lookup.get(i) 
                  if index != None: return constants[index]
                  else: return None

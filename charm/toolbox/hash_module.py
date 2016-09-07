@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 import charm.core.crypto.cryptobase
 from charm.core.math.pairing import pairing,pc_element,ZR
 from charm.core.math.integer import integer,int2Bytes
@@ -35,7 +36,7 @@ class Hash():
             #print("Hashing =>", args)
             strs = ""
             for i in args:
-                if type(i) == str:
+                if type(i) == compat_str:
                     strs += str(base64.encodebytes(bytes(i, 'utf8')))
                 elif type(i) == bytes:
                     strs += str(base64.encodebytes(i))
@@ -77,7 +78,7 @@ class Waters:
     
     def hash(self, strID):
         '''Hash the identity string and break it up in to l bit pieces'''
-        assert type(strID) == str, "invalid input type"
+        assert type(strID) == compat_str, "invalid input type"
         hash = self.sha2(strID)
         
         val = Conversion.OS2IP(hash) #Convert to integer format

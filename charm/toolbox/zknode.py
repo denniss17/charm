@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 #!/usr/bin/python
 
 import string
@@ -13,7 +14,7 @@ class BinNode:
 		self.ATTR = 0
 
 		#OF = '' # anything above 1 and 2
-		if(isinstance(value, str)):
+		if(isinstance(value, compat_str)):
 			self.type = self.ATTR
 			self.attribute = string.upper(value)
 						

@@ -1,11 +1,12 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 from charm.toolbox.reCompiler import *
 from charm.toolbox.FSA import FSA
 
 
 class DFA:
     def __init__(self, regex, alphabet):
-        assert type(regex) == str, "'regex' needs to be a string"
+        assert type(regex) == compat_str, "'regex' needs to be a string"
         self.fsa = compileRE(regex)
         self.alphabet = alphabet
     
@@ -31,7 +32,7 @@ class DFA:
         Q, S, T, q0, F = M
         fsa1 = FSA(Q, S, T, q0, F)
         s_str = ""
-        if type(s) == str:
+        if type(s) == compat_str:
             return fsa1.accepts(s)
         elif type(s) == dict:
             keys = list(s.keys())
@@ -50,7 +51,7 @@ class DFA:
         Q, S, T, q0, F = M
         fsa1 = FSA(Q, S, T, q0, F)
         s_str = ""
-        if type(s) == str:
+        if type(s) == compat_str:
             return fsa1.getTransitions(s)
         elif type(s) == dict:
             keys = list(s.keys())
@@ -71,7 +72,7 @@ class DFA:
         return int(transitions[t_len][1])
         
     def getSymbols(self, s):
-        assert type(s) == str
+        assert type(s) == compat_str
         result = {}
         count = 1 # 1-indexed
         for i in s:

@@ -1,10 +1,10 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 """
 The serialization API supports the following datatypes: dict, list, str, bytes, int, float, and whatever is supported by group.serialize and group.deserialize
 
 """
 
-from __future__ import print_function
 import io, pickle
 import json, zlib
 from base64 import *
@@ -30,7 +30,7 @@ def serializeObject(Objects, group):
        return serializeDict(Objects, group)
     elif type(Objects) in [list,tuple]:
         return serializeList(Objects, group)
-    elif type(Objects) == str:
+    elif type(Objects) == compat_str:
         return 'str:'+Objects
     elif type(Objects) == bytes:
         return 'bytes:'+Objects.decode('UTF-8')
@@ -67,10 +67,10 @@ def deserializeObject(Objects, group):
         return deserializeList(Objects, group)
     elif type(Objects) == tuple:
         return deserializeTuple(Objects, group)
-    elif type(Objects) == str:
+    elif type(Objects) == compat_str:
         tmp=Objects.split(':',1)
         (t,obj)=(tmp[0],tmp[1])
-        if t=='str':
+        if t=='compat_str':
             return str(obj)
         elif t=='bytes':
             return getBytes(obj)
@@ -80,7 +80,7 @@ def deserializeObject(Objects, group):
         return Objects
     
 def pickleObject(Object):
-    valid_types = [bytes, dict, list, str, int]    
+    valid_types = [bytes, dict, list, compat_str, int]
     file = io.BytesIO()
     # check that dictionary is all bytes (if not, return None)
     if isinstance(Object, dict):
@@ -96,7 +96,7 @@ def pickleObject(Object):
     return encoded
 
 def unpickleObject(Object):
-    if type(Object) == str:
+    if type(Object) == compat_str:
        byte_object = Object
     else:
        return None

@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 
 # TODO: provide a transition checker that prevents a feedback loop, inconsistent state.
 # in user db that way user can eliminate store step on the receive side.
@@ -151,7 +152,7 @@ class Protocol:
     
 #    # serialize an object
 #    def serialize(self, object):
-#        if type(object) == str:
+#        if type(object) == compat_str:
 #            return bytes(object, 'utf8')
 #        return object
 #    
@@ -193,7 +194,7 @@ class Protocol:
         if type(object) == dict:
             bytes_object = serializeDict(object, self.group)
             return pickleObject(bytes_object)
-        elif type(object) == str:
+        elif type(object) == compat_str:
             return pickleObject(object)
         else:
 #            print("serialize: just =>", object)

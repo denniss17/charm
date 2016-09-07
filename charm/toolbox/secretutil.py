@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 '''
 Contains all the auxillary functions to do linear secret sharing (LSS) over an access structure. Mainly, we represent the 
 access structure as a binary tree. This could also support matrices for representing access structures.
@@ -136,7 +137,7 @@ class SecretUtil:
         
     
     def createPolicy(self, policy_string):
-        assert type(policy_string) == str, "invalid type for policy_string"
+        assert type(policy_string) == compat_str, "invalid type for policy_string"
         parser = PolicyParser()        
         policy_obj = parser.parse(policy_string)
         _dictCount, _dictLabel = {}, {}

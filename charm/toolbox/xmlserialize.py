@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 from charm.toolbox.pairinggroup import PairingGroup
 from charm.toolbox.ecgroup import ECGroup
 from charm.toolbox.integergroup import IntegerGroup
@@ -61,7 +62,7 @@ def getText(nodelist):
     return bytes(result, 'utf8')
 
 def parseFromXML(xmlObjectString, group=None):
-    assert type(xmlObjectString) == str, "Invalid type for XML object"
+    assert type(xmlObjectString) == compat_str, "Invalid type for XML object"
     dom = parseString(xmlObjectString)
     assert dom.documentElement.tagName == "charm", "Not a Charm element"    
 #    print(dom.toprettyxml(indent="  "))

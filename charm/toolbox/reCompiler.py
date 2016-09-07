@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 """ Module re_compile -- compile a regular expression into an FSA
 
 To Do
@@ -124,7 +125,7 @@ class SymbolRECompiler:
 
 class CharacterSet:
     def __init__(self, ranges):
-        if type(ranges) == str:
+        if type(ranges) == compat_str:
             ranges = self.convertString(ranges)
         accum = []
         # copy, so sort doesn't destroy the arg
@@ -136,7 +137,7 @@ class CharacterSet:
                     accum.append(item)
                 else:
                     raise ValueError("invalid argument to CharacterSet")
-            elif type(item) == str:
+            elif type(item) == compat_str:
                 for c in item:
                     accum.append((c, c))
             else:

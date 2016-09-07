@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 '''
 Naor's generic IBE-to-Signature transform (generic composition)
  
@@ -49,7 +50,7 @@ class Sig_Generic_ibetosig_Naor01(PKSig):
         criteria = [('secDef', IND_ID_CPA), ('scheme', 'IBEnc'), ('messageSpace', GT)]
         if PKSig.checkProperty(self, ibe_scheme, criteria):
             # change our property as well
-            PKSig.updateProperty(self, ibe_scheme, secDef=EU_CMA, id=str, secModel=ROM)
+            PKSig.updateProperty(self, ibe_scheme, secDef=EU_CMA, id=compat_str, secModel=ROM)
             ibe = ibe_scheme
             #PKSig.printProperties(self)
         else:
@@ -64,7 +65,7 @@ class Sig_Generic_ibetosig_Naor01(PKSig):
         return (mpk, msk)
 
     def sign(self, sk, m):
-        assert type(m) in [str, bytes], "invalid message type!"
+        assert type(m) in [compat_str, bytes], "invalid message type!"
         return ibe.extract(sk, m)
 		
     def verify(self, pk, m, sig):

@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 # Implements the proof-of-concept ZK proof compiler
 # This compiler takes as input a set of public and secret inputs as well as a
 # statement to be proved/verified.  It outputs the  
@@ -22,7 +23,7 @@ def newStateFunction(func_name, args=True):
 def addToCode(lines):
     stmts = "        " # 8 spaces
     for stmt in lines:
-        if type(stmt) == str:
+        if type(stmt) == compat_str:
 #            print("Adding =>", stmt)
             stmts += stmt + "; "
     return stmts + "\n"

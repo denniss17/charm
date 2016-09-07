@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 from charm.toolbox.symcrypto import AuthenticatedCryptoAbstraction
 from charm.core.math.pairing import hashPair as sha1
 from charm.schemes.dabe_aw11 import Dabe
@@ -61,7 +62,7 @@ class HybridABEncMA(ABEncMultiAuth):
         return abencma.keygen(gp, sk, i, gid, pkey)
 
     def encrypt(self, pk, gp, M, policy_str):
-        if type(M) != bytes and type(policy_str) != str:
+        if type(M) != bytes and type(policy_str) != compat_str:
             raise Exception("message and policy not right type!")
         key = group.random(GT)
         c1 = abencma.encrypt(pk, gp, key, policy_str)

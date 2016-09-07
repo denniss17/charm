@@ -1,4 +1,6 @@
 from __future__ import absolute_import, print_function
+
+from charm.compatibility import compat_str
 '''
 Allison Lewko, Amit Sahai and Brent Waters (Pairing-based)
  
@@ -82,7 +84,7 @@ class KPabe(ABEnc):
         return D
     
     def negatedAttr(self, attribute):
-        if type(attribute) != str: attr = attribute.getAttribute()
+        if type(attribute) != compat_str: attr = attribute.getAttribute()
         else: attr = attribute
         if attr[0] == '!':
             if debug: print("Checking... => %s" % attr[0])

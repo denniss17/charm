@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 try:
   from charm.toolbox.pairingcurves import params as param_info
   from charm.core.math.pairing import pairing,pc_element,ZR,G1,G2,GT,init,pair,hashPair,H,random,serialize,deserialize,ismember,order
@@ -13,7 +14,7 @@ class PairingGroup():
         #legacy handler to handle calls that still pass in a file path
         if param_file:
           self.Pairing = pairing(file=param_id)
-        elif type(param_id) == str:
+        elif type(param_id) == compat_str:
           pairID = param_info.get(param_id)
           assert pairID != None, "'%s' not recognized! See 'pairingcurves.py' in toolbox." % param_id
           if pairing_lib == libs.pbc:
@@ -139,7 +140,7 @@ class PairingGroup():
             for i in range(0, len(data)):
                print(prefix, (i+1),':',data[i])
             print('')
-        elif type(data) == str:
+        elif type(data) == compat_str:
             print(data)
         else:
             print(type(data), ':', data)

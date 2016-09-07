@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 '''A collection of encryption and signature padding schemes'''
 from charm.toolbox.bitstring import Bytes,py3
 from charm.toolbox.securerandom import SecureRandomFactory
@@ -138,7 +139,7 @@ class hashFunc:
     #message must be a binary string
     def __call__(self, message):
         h = self.hashObj.copy()
-        if type(message) == str:
+        if type(message) == compat_str:
             h.update(bytes(message))
         elif type(message) in [bytes, Bytes]:
             h.update(bytes(message)) # bytes or custom Bytes

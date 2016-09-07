@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 '''
 Kan Yang, Xiaohua Jia 
  
@@ -32,7 +33,7 @@ class MAABE(object):
         #:the prime order p is contained somewhere within the group object
         g = self.group.random(G1)
         #: The oracle that maps global identities GID onto elements of G
-        #:H = lambda str: g** group.hash(str)
+        #:H = lambda compat_str: g** group.hash(compat_str)
         H = lambda x: self.group.hash(x, G1)
         a = self.group.random()
         b = self.group.random()

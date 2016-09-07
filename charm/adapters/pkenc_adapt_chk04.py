@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_str
 '''
 Canetti-Halevi-Katz Public Key Encryption, IBE-to-PKE transform (generic composition of IBE+signature -> PKE)
  
@@ -39,7 +40,7 @@ class CHK04(PKEnc):
     def __init__(self, ibe_scheme, ots_scheme, groupObj):
         PKEnc.__init__(self)
         global ibe, ots, group
-        criteria1 = [('secDef', 'IND_ID_CPA'), ('scheme', 'IBEnc'), ('id', str)]
+        criteria1 = [('secDef', 'IND_ID_CPA'), ('scheme', 'IBEnc'), ('id', compat_str)]
         criteria2 = [('secDef', 'EU_CMA'), ('scheme', 'IBSig')] 
         if PKEnc.checkProperty(self, ibe_scheme, criteria1): # and PKEnc.checkProperty(self, ots_scheme, criteria2):
             PKEnc.updateProperty(self, ibe_scheme, secDef=IND_CCA, secModel=SM)
