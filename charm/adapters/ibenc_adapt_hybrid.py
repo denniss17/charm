@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_bytes
 from charm.toolbox.symcrypto import AuthenticatedCryptoAbstraction
 from charm.toolbox.pairinggroup import PairingGroup,ZR,G1,G2,GT,pair
 from charm.core.math.pairing import hashPair as sha1
@@ -36,7 +37,7 @@ class HybridIBEnc(IBEnc):
         return ibenc.extract(mk, ID)
     
     def encrypt(self, pk, ID, M):
-        if type(M) != bytes: raise "message not right type!"        
+        if type(M) != compat_bytes: raise "message not right type!"
         key = group.random(GT)
         c1 = ibenc.encrypt(pk, ID, key)
         # instantiate a symmetric enc scheme from this key

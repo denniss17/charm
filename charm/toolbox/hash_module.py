@@ -1,5 +1,6 @@
 from __future__ import absolute_import, print_function
 from charm.compatibility import compat_str
+from charm.compatibility import compat_bytes
 import charm.core.crypto.cryptobase
 from charm.core.math.pairing import pairing,pc_element,ZR
 from charm.core.math.integer import integer,int2Bytes
@@ -38,7 +39,7 @@ class Hash():
             for i in args:
                 if type(i) == compat_str:
                     strs += str(base64.encodebytes(bytes(i, 'utf8')))
-                elif type(i) == bytes:
+                elif type(i) == compat_bytes:
                     strs += str(base64.encodebytes(i))
                 elif type(i) == integer:
                     strs += str(base64.encodebytes(int2Bytes(i)))

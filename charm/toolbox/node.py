@@ -1,5 +1,6 @@
 from __future__ import absolute_import, print_function
 from charm.compatibility import compat_str
+from charm.compatibility import compat_bytes
 import string
 from charm.toolbox.enum import *
 
@@ -86,9 +87,9 @@ class BinNode:
           return False
       if type(self) == type(other):
           return self.getAttribute() == other.getAttribute()
-      elif type(other) in [compat_str, bytes]:
+      elif type(other) in [compat_str, compat_bytes]:
           return other in self.getAttributeAndIndex()
-      elif type(self) in [compat_str, bytes]:
+      elif type(self) in [compat_str, compat_bytes]:
           return self in other.getAttributeAndIndex()
       else:
           raise ValueError('BinNode - invalid comparison.')

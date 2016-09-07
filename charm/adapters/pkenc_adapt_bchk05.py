@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_bytes
 '''
 Boneh-Canetti-Halevi-Katz Public Key Encryption, IBE-to-PKE transform
 
@@ -65,9 +66,9 @@ class BCHKIBEnc(IBEnc):
 
     def encrypt(self, pk, m):
         (k, ID, x) = encap.S(pk['pub'])
-        if type(m) != bytes:
+        if type(m) != compat_bytes:
            m = bytes(m, 'utf8')	
-        if type(x) != bytes:
+        if type(x) != compat_bytes:
            x = bytes(x, 'utf8')	
 
         ID2 = group.hash(ID, ZR)

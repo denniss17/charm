@@ -1,5 +1,6 @@
 from __future__ import absolute_import, print_function
 from charm.compatibility import compat_str
+from charm.compatibility import compat_bytes
 """
 The serialization API supports the following datatypes: dict, list, str, bytes, int, float, and whatever is supported by group.serialize and group.deserialize
 
@@ -32,7 +33,7 @@ def serializeObject(Objects, group):
         return serializeList(Objects, group)
     elif type(Objects) == compat_str:
         return 'str:'+Objects
-    elif type(Objects) == bytes:
+    elif type(Objects) == compat_bytes:
         return 'bytes:'+Objects.decode('UTF-8')
     elif type(Objects) in [int,float]: 
        return Objects
@@ -72,15 +73,15 @@ def deserializeObject(Objects, group):
         (t,obj)=(tmp[0],tmp[1])
         if t=='compat_str':
             return str(obj)
-        elif t=='bytes':
+        elif t=='compat_bytes':
             return getBytes(obj)
-    elif type(Objects) == bytes:
+    elif type(Objects) == compat_bytes:
         return group.deserialize(Objects)
     else:
         return Objects
     
 def pickleObject(Object):
-    valid_types = [bytes, dict, list, compat_str, int]
+    valid_types = [compat_bytes, dict, list, compat_str, int]
     file = io.BytesIO()
     # check that dictionary is all bytes (if not, return None)
     if isinstance(Object, dict):
@@ -101,14 +102,14 @@ def unpickleObject(Object):
     else:
        return None
     decoded = b64decode(byte_object)
-    if type(decoded) == bytes and len(decoded) > 0:
+    if type(decoded) == compat_bytes and len(decoded) > 0:
         return pickle.loads(decoded)
     return None
 
 # JSON does not support 'bytes' objects, so these from/to_json 
 # functions handle protecting the 
 def to_json(object):
-    if isinstance(object, bytes):
+    if isinstance(object, compat_bytes):
         return {'__class__': 'bytes', '__value__': list(object) }
     elif isinstance(object, tuple):
         return {'__class__': 'tuple', '__value__': list(object) }
@@ -132,7 +133,7 @@ def objectToBytes(object, group):
     
 def bytesToObject(byteobject, group):
     #unwrap_object = unpickleObject(byteobject)
-    decoded = bytes.decode(zlib.decompress(b64decode(byteobject)))
+    decoded = compat_bytes.decode(zlib.decompress(b64decode(byteobject)))
     unwrap_object = json.loads(decoded, object_hook=from_json)
     return deserializeObject(unwrap_object, group)
 

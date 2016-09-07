@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_bytes
 try:
   #from charm.core.math.integer import integer,randomBits,random,randomPrime,isPrime,encode,decode,hashInt,bitsize,legendre,gcd,lcm,serialize,deserialize,int2Bytes,toInt
   from charm.core.math.integer import * #InitBenchmark,StartBenchmark,EndBenchmark,GetBenchmark,GetGeneralBenchmarks,ClearBenchmark
@@ -75,7 +76,7 @@ class IntegerGroup:
         return serialize(object)
     
     def deserialize(self, bytes_object):
-        assert type(bytes_object) == bytes, "cannot deserialize object"
+        assert type(bytes_object) == compat_bytes, "cannot deserialize object"
         return deserialize(bytes_object)
     
     def hash(self, *args):
@@ -187,7 +188,7 @@ class IntegerGroupQ:
         return serialize(object)
     
     def deserialize(self, bytes_object):
-        assert type(bytes_object) == bytes, "cannot deserialize object"
+        assert type(bytes_object) == compat_bytes, "cannot deserialize object"
         return deserialize(bytes_object)
 
     def InitBenchmark(self):
@@ -250,7 +251,7 @@ class RSAGroup:
         return serialize(object)
     
     def deserialize(self, bytes_object):
-        assert type(bytes_object) == bytes, "cannot deserialize object"
+        assert type(bytes_object) == compat_bytes, "cannot deserialize object"
         return deserialize(bytes_object)
 
     def random(self, max=0):

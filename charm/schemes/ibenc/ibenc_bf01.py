@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_bytes
 '''
 Boneh-Franklin Identity Based Encryption
   
@@ -103,7 +104,7 @@ class IBE_BonehFranklin(IBEnc):
         return None
 
     def encodeToZn(self, message):
-        assert type(message) == bytes, "Input must be of type bytes"
+        assert type(message) == compat_bytes, "Input must be of type compat_bytes"
         return integer(message)
         
     def decodeFromZn(self, element):

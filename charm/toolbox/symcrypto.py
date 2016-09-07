@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+from charm.compatibility import compat_bytes
 from charm.toolbox.paddingschemes import PKCS7Padding
 from charm.toolbox.securerandom import OpenSSLRand
 from charm.core.crypto.cryptobase import MODE_CBC,AES,selectPRP
@@ -106,7 +107,7 @@ class SymmetricCryptoAbstraction(object):
 
     def encrypt(self, message):
         #This should be removed when all crypto functions deal with bytes"
-        if type(message) != bytes :
+        if type(message) != compat_bytes :
             message = bytes(message, "utf-8")
         ct = self._encrypt(message)
         #JSON strings cannot have binary data in them, so we must base64 encode cipher

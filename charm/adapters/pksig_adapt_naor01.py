@@ -1,5 +1,6 @@
 from __future__ import absolute_import, print_function
 from charm.compatibility import compat_str
+from charm.compatibility import compat_bytes
 '''
 Naor's generic IBE-to-Signature transform (generic composition)
  
@@ -65,7 +66,7 @@ class Sig_Generic_ibetosig_Naor01(PKSig):
         return (mpk, msk)
 
     def sign(self, sk, m):
-        assert type(m) in [compat_str, bytes], "invalid message type!"
+        assert type(m) in [compat_str, compat_bytes], "invalid message type!"
         return ibe.extract(sk, m)
 		
     def verify(self, pk, m, sig):
