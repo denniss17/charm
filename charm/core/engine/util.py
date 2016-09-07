@@ -70,9 +70,9 @@ def deserializeObject(Objects, group):
     elif type(Objects) == compat_str:
         tmp=Objects.split(':',1)
         (t,obj)=(tmp[0],tmp[1])
-        if t=='compat_str':
+        if t=='str':
             return compat_str(obj)
-        elif t=='compat_bytes':
+        elif t=='bytes':
             return getBytes(obj)
     elif type(Objects) == compat_bytes:
         return group.deserialize(Objects)
