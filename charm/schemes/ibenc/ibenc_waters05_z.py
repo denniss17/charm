@@ -18,8 +18,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 3. We stored \vec{\omega}  as part of msk. This will speed up the extract() a lot. The trick is that, instead of doing exponential operation and then multiply all together, we will compute the exponent first and then do one exponential operation
 4 The code works perfectly under asymmetric groups now.
 5.All elements in sk_id is now in G2 and ct_id in G1. Before that, we have one element in G1 and the other in G2 in both sk_id and ct_id.
-''' 
-from __future__ import print_function
+'''
 from charm.toolbox.pairinggroup import PairingGroup,ZR,G1,G2,GT,pair
 from charm.toolbox.IBEnc import IBEnc
 from charm.toolbox.hash_module import Waters
